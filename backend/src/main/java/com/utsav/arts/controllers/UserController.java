@@ -7,6 +7,7 @@ import com.utsav.arts.models.User;
 import com.utsav.arts.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -73,6 +74,7 @@ public class UserController {
 
     // ---------------- DELETE ----------------
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER') or #id == authentication.principal.id")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();

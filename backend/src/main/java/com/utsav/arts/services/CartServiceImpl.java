@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-@Service
+@Service("cartService")
 @Transactional
 public class CartServiceImpl implements CartService {
 

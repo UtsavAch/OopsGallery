@@ -11,6 +11,7 @@ import com.utsav.arts.services.PaymentService;
 import com.utsav.arts.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,17 +19,14 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/payments")
+@PreAuthorize("hasAnyRole('USER', 'OWNER')") // Only logged-in people can access payment routes
 public class PaymentController {
 
     private final PaymentService paymentService;
     private final UserService userService;
     private final OrdersService ordersService;
 
-    public PaymentController(
-            PaymentService paymentService,
-            UserService userService,
-            OrdersService ordersService
-    ) {
+    public PaymentController(PaymentService paymentService, UserService userService, OrdersService ordersService) {
         this.paymentService = paymentService;
         this.userService = userService;
         this.ordersService = ordersService;
@@ -36,120 +34,72 @@ public class PaymentController {
 
     // ---------------- CREATE ----------------
     @PostMapping
-    public ResponseEntity<PaymentResponseDTO> save(
-            @RequestBody PaymentRequestDTO requestDTO
-    ) {
+    @PreAuthorize("hasRole('OWNER') or @userService.isUserOwner(#requestDTO.userId, authentication.name)")
+    public ResponseEntity<PaymentResponseDTO> save(@RequestBody PaymentRequestDTO requestDTO) {
         User user = userService.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Orders order = ordersService.findById(requestDTO.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
-        Payment payment =
-                PaymentMapper.toEntity(requestDTO, order, user);
-
+        Payment payment = PaymentMapper.toEntity(requestDTO, order, user);
         Payment savedPayment = paymentService.save(payment);
 
-        return new ResponseEntity<>(
-                PaymentMapper.toResponseDTO(savedPayment),
-                HttpStatus.CREATED
-        );
-    }
-
-    // ---------------- UPDATE ----------------
-    @PutMapping("/{id}")
-    public ResponseEntity<PaymentResponseDTO> update(
-            @PathVariable int id,
-            @RequestBody PaymentRequestDTO requestDTO
-    ) {
-        User user = userService.findById(requestDTO.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Orders order = ordersService.findById(requestDTO.getOrderId())
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
-
-        Payment payment =
-                PaymentMapper.toEntity(requestDTO, order, user);
-        payment.setId(id);
-
-        Payment updatedPayment = paymentService.update(payment);
-
-        return ResponseEntity.ok(
-                PaymentMapper.toResponseDTO(updatedPayment)
-        );
+        return new ResponseEntity<>(PaymentMapper.toResponseDTO(savedPayment), HttpStatus.CREATED);
     }
 
     // ---------------- READ ----------------
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER') or @paymentService.isPaymentOwner(#id, authentication.name)")
     public ResponseEntity<PaymentResponseDTO> findById(@PathVariable int id) {
         return paymentService.findById(id)
-                .map(p -> ResponseEntity.ok(
-                        PaymentMapper.toResponseDTO(p)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/transaction/{transactionId}")
-    public ResponseEntity<PaymentResponseDTO> findByTransactionId(
-            @PathVariable String transactionId
-    ) {
-        return paymentService.findByTransactionId(transactionId)
-                .map(p -> ResponseEntity.ok(
-                        PaymentMapper.toResponseDTO(p)))
+                .map(payment -> ResponseEntity.ok(PaymentMapper.toResponseDTO(payment)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<PaymentResponseDTO>> findByUserId(
-            @PathVariable int userId
-    ) {
-        List<PaymentResponseDTO> payments =
-                paymentService.findByUserId(userId)
-                        .stream()
-                        .map(PaymentMapper::toResponseDTO)
-                        .collect(Collectors.toList());
-
+    @PreAuthorize("hasRole('OWNER') or @userService.isUserOwner(#userId, authentication.name)")
+    public ResponseEntity<List<PaymentResponseDTO>> findByUserId(@PathVariable int userId) {
+        List<PaymentResponseDTO> payments = paymentService.findByUserId(userId)
+                .stream()
+                .map(PaymentMapper::toResponseDTO)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(payments);
     }
 
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<List<PaymentResponseDTO>> findByOrderId(
-            @PathVariable int orderId
-    ) {
-        List<PaymentResponseDTO> payments =
-                paymentService.findByOrderId(orderId)
-                        .stream()
-                        .map(PaymentMapper::toResponseDTO)
-                        .collect(Collectors.toList());
-
+    @PreAuthorize("hasRole('OWNER') or @ordersService.isOrderOwner(#orderId, authentication.name)")
+    public ResponseEntity<List<PaymentResponseDTO>> findByOrderId(@PathVariable int orderId) {
+        List<PaymentResponseDTO> payments = paymentService.findByOrderId(orderId)
+                .stream()
+                .map(PaymentMapper::toResponseDTO)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(payments);
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<PaymentResponseDTO>> findByStatus(
-            @PathVariable String status
-    ) {
-        List<PaymentResponseDTO> payments =
-                paymentService.findByStatus(status)
-                        .stream()
-                        .map(PaymentMapper::toResponseDTO)
-                        .collect(Collectors.toList());
-
+    @PreAuthorize("hasRole('OWNER')") // Only owners can see payments filtered by status across the whole system
+    public ResponseEntity<List<PaymentResponseDTO>> findByStatus(@PathVariable String status) {
+        List<PaymentResponseDTO> payments = paymentService.findByStatus(status)
+                .stream()
+                .map(PaymentMapper::toResponseDTO)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(payments);
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('OWNER')") // Only owners can see all payments
     public ResponseEntity<List<PaymentResponseDTO>> findAll() {
-        List<PaymentResponseDTO> payments =
-                paymentService.findAll()
-                        .stream()
-                        .map(PaymentMapper::toResponseDTO)
-                        .collect(Collectors.toList());
-
+        List<PaymentResponseDTO> payments = paymentService.findAll()
+                .stream()
+                .map(PaymentMapper::toResponseDTO)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(payments);
     }
 
     // ---------------- DELETE ----------------
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER')") // Standard security practice: Users cannot delete payment records
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
         paymentService.deleteById(id);
         return ResponseEntity.noContent().build();

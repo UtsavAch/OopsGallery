@@ -20,4 +20,6 @@ public interface CartItemService {
     void deleteById(int id);
 
     void deleteByCartId(int cartId);
+
+    boolean isOwnerOfItem(int itemId, String userEmail);
 }

@@ -1,5 +1,7 @@
 package com.utsav.arts.dtos.userDTO;
 
+import com.utsav.arts.models.Role;
+
 public class UserResponseDTO {
 
     private int id;
@@ -8,7 +10,7 @@ public class UserResponseDTO {
     private String email;
     private String phoneNo;
     private String address;
-    private String role;
+    private Role role;
 
     public UserResponseDTO() {}
 
@@ -31,6 +33,6 @@ public class UserResponseDTO {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 }

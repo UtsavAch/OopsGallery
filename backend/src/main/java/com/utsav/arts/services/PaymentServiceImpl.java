@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("paymentService")
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
 
@@ -78,5 +78,12 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalArgumentException("Payment not found");
         }
         paymentRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean isPaymentOwner(int paymentId, String email) {
+        return findById(paymentId)
+                .map(payment -> payment.getUser().getEmail().equals(email))
+                .orElse(false);
     }
 }

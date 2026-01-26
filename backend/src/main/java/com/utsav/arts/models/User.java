@@ -26,12 +26,14 @@ public class User {
 
     private String address;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     public User() {}
 
     public User(int id, String firstName, String lastName, String email, String phoneNo,
-                String password, String address, String role) {
+                String password, String address, Role role) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -64,6 +66,6 @@ public class User {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 }

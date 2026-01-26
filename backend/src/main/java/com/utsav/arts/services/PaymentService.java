@@ -24,4 +24,6 @@ public interface PaymentService {
     List<Payment> findAll();
 
     void deleteById(int id);
+
+    boolean isPaymentOwner(int paymentId, String email);
 }

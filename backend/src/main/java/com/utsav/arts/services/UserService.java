@@ -20,4 +20,6 @@ public interface UserService {
     void deleteById(int id);
 
     boolean existsByEmail(String email);
+
+    boolean isUserOwner(int userId, String email);
 }

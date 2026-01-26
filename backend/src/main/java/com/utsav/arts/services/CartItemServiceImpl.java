@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("cartItemService")
 @Transactional
 public class CartItemServiceImpl implements CartItemService {
 
@@ -71,5 +71,11 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public void deleteByCartId(int cartId) {
         cartItemRepository.deleteByCartId(cartId);
+    }
+
+    public boolean isOwnerOfItem(int itemId, String userEmail) {
+        return findById(itemId)
+                .map(item -> item.getCart().getUser().getEmail().equals(userEmail))
+                .orElse(false);
     }
 }

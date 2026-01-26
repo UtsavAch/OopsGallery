@@ -2,6 +2,7 @@ package com.utsav.arts.mappers;
 
 import com.utsav.arts.dtos.userDTO.UserRequestDTO;
 import com.utsav.arts.dtos.userDTO.UserResponseDTO;
+import com.utsav.arts.models.Role;
 import com.utsav.arts.models.User;
 
 public class UserMapper {
@@ -14,7 +15,8 @@ public class UserMapper {
         user.setPhoneNo(dto.getPhoneNo());
         user.setPassword(dto.getPassword());
         user.setAddress(dto.getAddress());
-        user.setRole(dto.getRole());
+        // If the DTO role is null, default to ROLE_USER to avoid null pointers
+        user.setRole(dto.getRole() != null ? dto.getRole() : Role.ROLE_USER);
         return user;
     }
 

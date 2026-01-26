@@ -9,6 +9,7 @@ import com.utsav.arts.services.ArtworkService;
 import com.utsav.arts.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class ArtworkController {
 
     // ---------------- CREATE ----------------
     @PostMapping
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ArtworkResponseDTO> save(
             @RequestBody ArtworkRequestDTO requestDTO
     ) {
@@ -46,6 +48,7 @@ public class ArtworkController {
 
     // ---------------- UPDATE ----------------
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ArtworkResponseDTO> update(
             @PathVariable int id,
             @RequestBody ArtworkRequestDTO requestDTO
@@ -105,6 +108,7 @@ public class ArtworkController {
 
     // ---------------- DELETE ----------------
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
         artworkService.deleteById(id);
         return ResponseEntity.noContent().build();

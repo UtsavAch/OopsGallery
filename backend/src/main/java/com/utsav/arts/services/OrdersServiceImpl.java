@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("ordersService")
 @Transactional
 public class OrdersServiceImpl implements OrdersService {
 
@@ -72,5 +72,12 @@ public class OrdersServiceImpl implements OrdersService {
             throw new IllegalArgumentException("Order not found");
         }
         ordersRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean isOrderOwner(int orderId, String email) {
+        return findById(orderId)
+                .map(order -> order.getUser().getEmail().equals(email))
+                .orElse(false); // If order doesn't exist, access is denied safely
     }
 }

@@ -9,10 +9,12 @@ import com.utsav.arts.services.CartService;
 import com.utsav.arts.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/carts")
+@PreAuthorize("hasAnyRole('USER', 'OWNER')")
 public class CartController {
 
     private final CartService cartService;
@@ -28,6 +30,7 @@ public class CartController {
 
     // ---------------- CREATE CART ----------------
     @PostMapping
+    @PreAuthorize("hasRole('USER')") // Only regular users should be able to CREATE a cart
     public ResponseEntity<CartResponseDTO> save(
             @RequestBody CartRequestDTO requestDTO
     ) {
@@ -55,6 +58,9 @@ public class CartController {
     }
 
     @GetMapping("/user/{userId}")
+    // Logic: If you are an owner, you get in.
+    // If you are a user, we check if the cart you are requesting belongs to your email.
+    @PreAuthorize("hasRole('OWNER') or @cartService.findByUserId(#userId).get().user.email == authentication.name")
     public ResponseEntity<CartResponseDTO> findByUserId(
             @PathVariable int userId
     ) {

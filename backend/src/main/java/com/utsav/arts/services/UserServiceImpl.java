@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("userService")
 @Transactional
 public class UserServiceImpl implements UserService {
 
@@ -85,5 +85,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean isUserOwner(int userId, String email) {
+        return findById(userId)
+                .map(user -> user.getEmail().equals(email))
+                .orElse(false);
     }
 }

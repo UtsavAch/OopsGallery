@@ -10,23 +10,21 @@ import com.utsav.arts.services.ArtworkService;
 import com.utsav.arts.services.OrdersService;
 import com.utsav.arts.services.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
+@PreAuthorize("hasAnyRole('USER', 'OWNER')")
 public class OrdersController {
 
     private final OrdersService ordersService;
     private final UserService userService;
     private final ArtworkService artworkService;
 
-    public OrdersController(
-            OrdersService ordersService,
-            UserService userService,
-            ArtworkService artworkService
-    ) {
+    public OrdersController(OrdersService ordersService, UserService userService, ArtworkService artworkService) {
         this.ordersService = ordersService;
         this.userService = userService;
         this.artworkService = artworkService;
@@ -34,9 +32,9 @@ public class OrdersController {
 
     // CREATE ORDER
     @PostMapping
-    public ResponseEntity<OrdersResponseDTO> createOrder(
-            @RequestBody OrdersRequestDTO request
-    ) {
+    // Logic: Only owner or the specific user whose ID is in the request
+    @PreAuthorize("hasRole('OWNER') or @userService.isUserOwner(#request.userId, authentication.name)")
+    public ResponseEntity<OrdersResponseDTO> createOrder(@RequestBody OrdersRequestDTO request) {
         User user = userService.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -51,6 +49,7 @@ public class OrdersController {
 
     // GET ORDER BY ID
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER') or @ordersService.isOrderOwner(#id, authentication.name)")
     public ResponseEntity<OrdersResponseDTO> getOrderById(@PathVariable int id) {
         Orders order = ordersService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
@@ -60,6 +59,7 @@ public class OrdersController {
 
     // GET ALL ORDERS
     @GetMapping
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<OrdersResponseDTO>> getAllOrders() {
         List<OrdersResponseDTO> orders = ordersService.findAll()
                 .stream()
@@ -71,9 +71,8 @@ public class OrdersController {
 
     // GET ORDERS BY USER
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<OrdersResponseDTO>> getOrdersByUser(
-            @PathVariable int userId
-    ) {
+    @PreAuthorize("hasRole('OWNER') or @userService.isUserOwner(#userId, authentication.name)")
+    public ResponseEntity<List<OrdersResponseDTO>> getOrdersByUser(@PathVariable int userId) {
         List<OrdersResponseDTO> orders = ordersService.findByUserId(userId)
                 .stream()
                 .map(OrdersMapper::toDTO)
@@ -84,9 +83,8 @@ public class OrdersController {
 
     // GET ORDERS BY STATUS
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<OrdersResponseDTO>> getOrdersByStatus(
-            @PathVariable String status
-    ) {
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<List<OrdersResponseDTO>> getOrdersByStatus(@PathVariable String status) {
         List<OrdersResponseDTO> orders = ordersService.findByStatus(status)
                 .stream()
                 .map(OrdersMapper::toDTO)
@@ -97,10 +95,8 @@ public class OrdersController {
 
     // UPDATE ORDER
     @PutMapping("/{id}")
-    public ResponseEntity<OrdersResponseDTO> updateOrder(
-            @PathVariable int id,
-            @RequestBody OrdersRequestDTO request
-    ) {
+    @PreAuthorize("hasRole('OWNER') or @ordersService.isOrderOwner(#id, authentication.name)")
+    public ResponseEntity<OrdersResponseDTO> updateOrder(@PathVariable int id, @RequestBody OrdersRequestDTO request) {
         Orders order = ordersService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
@@ -114,6 +110,7 @@ public class OrdersController {
 
     // DELETE ORDER
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> deleteOrder(@PathVariable int id) {
         ordersService.deleteById(id);
         return ResponseEntity.noContent().build();

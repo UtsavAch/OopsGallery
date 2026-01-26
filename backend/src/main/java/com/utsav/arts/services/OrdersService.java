@@ -22,4 +22,6 @@ public interface OrdersService {
     List<Orders> findByStatus(String status);
 
     void deleteById(int id);
+
+    boolean isOrderOwner(int orderId, String email);
 }
