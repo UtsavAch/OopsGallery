@@ -1,5 +1,6 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.configurations.UserPrincipal;
 import com.utsav.arts.models.User;
 import com.utsav.arts.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
@@ -30,10 +31,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().name());
 
         // Return a Spring Security User object
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                Collections.singletonList(authority) // Pass the role here
-        );
+        return new UserPrincipal(user, Collections.singletonList(authority));
     }
 }

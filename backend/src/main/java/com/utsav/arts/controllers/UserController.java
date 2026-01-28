@@ -3,6 +3,7 @@ package com.utsav.arts.controllers;
 import com.utsav.arts.dtos.userDTO.UserRequestDTO;
 import com.utsav.arts.dtos.userDTO.UserResponseDTO;
 import com.utsav.arts.mappers.UserMapper;
+import com.utsav.arts.models.Role;
 import com.utsav.arts.models.User;
 import com.utsav.arts.services.UserService;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponseDTO> save(@RequestBody UserRequestDTO requestDTO) {
         User user = UserMapper.toEntity(requestDTO);
+        user.setRole(Role.ROLE_USER);
         User savedUser = userService.save(user);
         return new ResponseEntity<>(
                 UserMapper.toResponseDTO(savedUser),
@@ -36,6 +38,7 @@ public class UserController {
 
     // ---------------- UPDATE ----------------
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER') or #id == authentication.principal.id")
     public ResponseEntity<UserResponseDTO> update(
             @PathVariable int id,
             @RequestBody UserRequestDTO requestDTO
