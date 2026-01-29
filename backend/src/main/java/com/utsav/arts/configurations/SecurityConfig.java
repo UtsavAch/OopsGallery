@@ -55,11 +55,18 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/artworks/**").permitAll()
 
-                        // ADD THIS LINE: Allow anyone to create a new account
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // Publicly accessible
+                        .requestMatchers(HttpMethod.GET, "/api/artworks/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/users").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
+
+                        // Explicitly lock down sensitive operations
+                        .requestMatchers(HttpMethod.POST, "/api/artworks/**").hasRole("OWNER")
+                        .requestMatchers(HttpMethod.PUT, "/api/artworks/**").hasRole("OWNER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/artworks/**").hasRole("OWNER")
 
                         .anyRequest().authenticated()
                 );

@@ -8,7 +8,6 @@ public class ArtworkRequestDTO {
     private String label;
     private int price;
     private String imgUrl;
-    private int ownerId;
 
     public ArtworkRequestDTO() {}
 
@@ -29,7 +28,4 @@ public class ArtworkRequestDTO {
 
     public String getImgUrl() { return imgUrl; }
     public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }
-
-    public int getOwnerId() { return ownerId; }
-    public void setOwnerId(int ownerId) { this.ownerId = ownerId; }
 }

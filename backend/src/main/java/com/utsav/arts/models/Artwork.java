@@ -21,29 +21,19 @@ public class Artwork {
 
     private int price;
 
-    private int likes;
-
     private String imgUrl;
 
-    // Link to User entity
-    @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
-
-    // Default constructor required by JPA
     public Artwork() {}
 
     // Constructor for convenience
-    public Artwork(int id, String title, String description, String category, String label, int price, int likes, String imgUrl, User owner) {
+    public Artwork(int id, String title, String description, String category, String label, int price,String imgUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.category = category;
         this.label = label;
         this.price = price;
-        this.likes = likes;
         this.imgUrl = imgUrl;
-        this.owner = owner;
     }
 
     // Getters and Setters
@@ -65,12 +55,6 @@ public class Artwork {
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
 
-    public int getLikes() { return likes; }
-    public void setLikes(int likes) { this.likes = likes; }
-
     public String getImgUrl() { return imgUrl; }
     public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }
-
-    public User getOwner() { return owner; }
-    public void setOwner(User owner) { this.owner = owner; }
 }

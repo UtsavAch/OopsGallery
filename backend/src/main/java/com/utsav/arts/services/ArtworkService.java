@@ -17,7 +17,5 @@ public interface ArtworkService {
 
     List<Artwork> findByCategory(String category);
 
-    List<Artwork> findByOwnerId(int ownerId);
-
     void deleteById(int id);
 }

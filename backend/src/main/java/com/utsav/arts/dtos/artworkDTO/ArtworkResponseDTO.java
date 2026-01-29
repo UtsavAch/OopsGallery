@@ -8,9 +8,7 @@ public class ArtworkResponseDTO {
     private String category;
     private String label;
     private int price;
-    private int likes;
     private String imgUrl;
-    private int ownerId;
 
     public ArtworkResponseDTO() {}
 
@@ -32,12 +30,6 @@ public class ArtworkResponseDTO {
     public int getPrice() { return price; }
     public void setPrice(int price) { this.price = price; }
 
-    public int getLikes() { return likes; }
-    public void setLikes(int likes) { this.likes = likes; }
-
     public String getImgUrl() { return imgUrl; }
     public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }
-
-    public int getOwnerId() { return ownerId; }
-    public void setOwnerId(int ownerId) { this.ownerId = ownerId; }
 }

@@ -3,11 +3,10 @@ package com.utsav.arts.mappers;
 import com.utsav.arts.dtos.artworkDTO.ArtworkRequestDTO;
 import com.utsav.arts.dtos.artworkDTO.ArtworkResponseDTO;
 import com.utsav.arts.models.Artwork;
-import com.utsav.arts.models.User;
 
 public class ArtworkMapper {
 
-    public static Artwork toEntity(ArtworkRequestDTO dto, User owner) {
+    public static Artwork toEntity(ArtworkRequestDTO dto) {
         Artwork artwork = new Artwork();
         artwork.setTitle(dto.getTitle());
         artwork.setDescription(dto.getDescription());
@@ -15,7 +14,6 @@ public class ArtworkMapper {
         artwork.setLabel(dto.getLabel());
         artwork.setPrice(dto.getPrice());
         artwork.setImgUrl(dto.getImgUrl());
-        artwork.setOwner(owner);
         return artwork;
     }
 
@@ -27,9 +25,7 @@ public class ArtworkMapper {
         dto.setCategory(artwork.getCategory());
         dto.setLabel(artwork.getLabel());
         dto.setPrice(artwork.getPrice());
-        dto.setLikes(artwork.getLikes());
         dto.setImgUrl(artwork.getImgUrl());
-        dto.setOwnerId(artwork.getOwner().getId());
         return dto;
     }
 }

@@ -20,16 +20,9 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     @Override
     public Artwork save(Artwork artwork) {
-        if (artwork.getOwner() == null) {
-            throw new IllegalArgumentException("Artwork must have an owner");
-        }
-
         if (artwork.getTitle() == null || artwork.getTitle().isBlank()) {
             throw new IllegalArgumentException("Artwork title cannot be empty");
         }
-
-        // Default value
-        artwork.setLikes(0);
 
         return artworkRepository.save(artwork);
     }
@@ -45,8 +38,6 @@ public class ArtworkServiceImpl implements ArtworkService {
         existingArtwork.setLabel(updatedArtwork.getLabel());
         existingArtwork.setPrice(updatedArtwork.getPrice());
         existingArtwork.setImgUrl(updatedArtwork.getImgUrl());
-
-        // Note: Owner should generally NOT be changed
 
         return artworkRepository.update(existingArtwork);
     }
@@ -64,11 +55,6 @@ public class ArtworkServiceImpl implements ArtworkService {
     @Override
     public List<Artwork> findByCategory(String category) {
         return artworkRepository.findByCategory(category);
-    }
-
-    @Override
-    public List<Artwork> findByOwnerId(int ownerId) {
-        return artworkRepository.findByOwnerId(ownerId);
     }
 
     @Override

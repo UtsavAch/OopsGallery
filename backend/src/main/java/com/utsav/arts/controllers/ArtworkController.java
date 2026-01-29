@@ -4,9 +4,7 @@ import com.utsav.arts.dtos.artworkDTO.ArtworkRequestDTO;
 import com.utsav.arts.dtos.artworkDTO.ArtworkResponseDTO;
 import com.utsav.arts.mappers.ArtworkMapper;
 import com.utsav.arts.models.Artwork;
-import com.utsav.arts.models.User;
 import com.utsav.arts.services.ArtworkService;
-import com.utsav.arts.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,12 +18,9 @@ import java.util.stream.Collectors;
 public class ArtworkController {
 
     private final ArtworkService artworkService;
-    private final UserService userService;
 
-    public ArtworkController(ArtworkService artworkService,
-                             UserService userService) {
+    public ArtworkController(ArtworkService artworkService) {
         this.artworkService = artworkService;
-        this.userService = userService;
     }
 
     // ---------------- CREATE ----------------
@@ -34,10 +29,7 @@ public class ArtworkController {
     public ResponseEntity<ArtworkResponseDTO> save(
             @RequestBody ArtworkRequestDTO requestDTO
     ) {
-        User owner = userService.findById(requestDTO.getOwnerId())
-                .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
-
-        Artwork artwork = ArtworkMapper.toEntity(requestDTO, owner);
+        Artwork artwork = ArtworkMapper.toEntity(requestDTO);
         Artwork savedArtwork = artworkService.save(artwork);
 
         return new ResponseEntity<>(
@@ -53,10 +45,8 @@ public class ArtworkController {
             @PathVariable int id,
             @RequestBody ArtworkRequestDTO requestDTO
     ) {
-        User owner = userService.findById(requestDTO.getOwnerId())
-                .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
 
-        Artwork artwork = ArtworkMapper.toEntity(requestDTO, owner);
+        Artwork artwork = ArtworkMapper.toEntity(requestDTO);
         Artwork updatedArtwork = artworkService.update(id, artwork);
 
         return ResponseEntity.ok(
@@ -87,18 +77,6 @@ public class ArtworkController {
             @PathVariable String category
     ) {
         List<ArtworkResponseDTO> artworks = artworkService.findByCategory(category)
-                .stream()
-                .map(ArtworkMapper::toResponseDTO)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(artworks);
-    }
-
-    @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<List<ArtworkResponseDTO>> findByOwnerId(
-            @PathVariable int ownerId
-    ) {
-        List<ArtworkResponseDTO> artworks = artworkService.findByOwnerId(ownerId)
                 .stream()
                 .map(ArtworkMapper::toResponseDTO)
                 .collect(Collectors.toList());

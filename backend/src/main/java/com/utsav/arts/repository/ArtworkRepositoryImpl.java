@@ -51,16 +51,6 @@ public class ArtworkRepositoryImpl implements ArtworkRepository {
     }
 
     @Override
-    public List<Artwork> findByOwnerId(int ownerId) {
-        return entityManager.createQuery(
-                        "SELECT a FROM Artwork a WHERE a.owner.id = :ownerId",
-                        Artwork.class
-                )
-                .setParameter("ownerId", ownerId)
-                .getResultList();
-    }
-
-    @Override
     public void deleteById(int id) {
         Artwork artwork = entityManager.find(Artwork.class, id);
         if (artwork != null) {
