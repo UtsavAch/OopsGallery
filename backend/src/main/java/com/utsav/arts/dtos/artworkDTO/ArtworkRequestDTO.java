@@ -1,12 +1,14 @@
 package com.utsav.arts.dtos.artworkDTO;
 
+import java.math.BigDecimal;
+
 public class ArtworkRequestDTO {
 
     private String title;
     private String description;
     private String category;
     private String label;
-    private int price;
+    private BigDecimal price;
     private String imgUrl;
 
     public ArtworkRequestDTO() {}
@@ -23,8 +25,8 @@ public class ArtworkRequestDTO {
     public String getLabel() { return label; }
     public void setLabel(String label) { this.label = label; }
 
-    public int getPrice() { return price; }
-    public void setPrice(int price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public String getImgUrl() { return imgUrl; }
     public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }

@@ -1,6 +1,7 @@
 package com.utsav.arts.configurations;
 
 import com.utsav.arts.services.UserDetailsServiceImpl;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -44,34 +45,41 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    public AuthenticationManager authenticationManager(@NonNull AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(@NonNull HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
+
+                        // ---------- AUTH ----------
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        // ---------- CORS PREFLIGHT ----------
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Publicly accessible
+                        // ---------- PUBLIC ----------
                         .requestMatchers(HttpMethod.GET, "/api/artworks/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
 
-                        // Explicitly lock down sensitive operations
-                        .requestMatchers(HttpMethod.POST, "/api/artworks/**").hasRole("OWNER")
-                        .requestMatchers(HttpMethod.PUT, "/api/artworks/**").hasRole("OWNER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/artworks/**").hasRole("OWNER")
-
+                        // ---------- PROTECTED ----------
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 );
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(
+                jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class
+        );
+
         return http.build();
     }
+
 }

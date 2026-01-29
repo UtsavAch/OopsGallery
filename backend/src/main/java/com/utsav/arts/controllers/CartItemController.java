@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/cart-items")
-// Only logged in Users and Owners can touch cart-related data
 @PreAuthorize("hasAnyRole('USER', 'OWNER')")
 public class CartItemController {
 
@@ -37,8 +36,7 @@ public class CartItemController {
 
     // ---------------- ADD TO CART ----------------
     @PostMapping
-    // Ensure the user is adding items to their OWN cart
-    @PreAuthorize("hasRole('OWNER') or @cartService.findById(#requestDTO.cartId).get().user.email == authentication.name")
+    @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#requestDTO.cartId, authentication.principal.id)")
     public ResponseEntity<CartItemResponseDTO> save(@RequestBody CartItemRequestDTO requestDTO) {
         Cart cart = cartService.findById(requestDTO.getCartId())
                 .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
@@ -54,22 +52,17 @@ public class CartItemController {
 
     // ---------------- UPDATE QUANTITY ----------------
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwnerOfItem(#id, authentication.name)")
+    @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<CartItemResponseDTO> update(@PathVariable int id, @RequestBody CartItemRequestDTO requestDTO) {
-
-        // 1. Safely retrieve the Cart
         Cart cart = cartService.findById(requestDTO.getCartId())
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found with ID: " + requestDTO.getCartId()));
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
 
-        // 2. Safely retrieve the Artwork
         Artwork artwork = artworkService.findById(requestDTO.getArtworkId())
-                .orElseThrow(() -> new IllegalArgumentException("Artwork not found with ID: " + requestDTO.getArtworkId()));
+                .orElseThrow(() -> new IllegalArgumentException("Artwork not found"));
 
-        // 3. Map to entity and set the ID from the PathVariable
         CartItem cartItem = CartItemMapper.toEntity(requestDTO, cart, artwork);
         cartItem.setId(id);
 
-        // 4. Perform the update
         CartItem updatedItem = cartItemService.update(cartItem);
 
         return ResponseEntity.ok(CartItemMapper.toResponseDTO(updatedItem));
@@ -77,7 +70,7 @@ public class CartItemController {
 
     // ---------------- READ ----------------
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwnerOfItem(#id, authentication.name)")
+    @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<CartItemResponseDTO> findById(@PathVariable int id) {
         return cartItemService.findById(id)
                 .map(item -> ResponseEntity.ok(CartItemMapper.toResponseDTO(item)))
@@ -85,8 +78,7 @@ public class CartItemController {
     }
 
     @GetMapping("/cart/{cartId}")
-    // Check if the requester owns the cart being queried
-    @PreAuthorize("hasRole('OWNER') or @cartService.findById(#cartId).get().user.email == authentication.name")
+    @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#cartId, authentication.principal.id)")
     public ResponseEntity<List<CartItemResponseDTO>> findByCartId(@PathVariable int cartId) {
         List<CartItemResponseDTO> items = cartItemService.findByCartId(cartId)
                 .stream()
@@ -97,14 +89,14 @@ public class CartItemController {
 
     // ---------------- DELETE ----------------
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwnerOfItem(#id, authentication.name)")
+    @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
         cartItemService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/cart/{cartId}")
-    @PreAuthorize("hasRole('OWNER') or @cartService.findById(#cartId).get().user.email == authentication.name")
+    @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#cartId, authentication.principal.id)")
     public ResponseEntity<Void> deleteByCartId(@PathVariable int cartId) {
         cartItemService.deleteByCartId(cartId);
         return ResponseEntity.noContent().build();

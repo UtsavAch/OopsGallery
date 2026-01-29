@@ -18,13 +18,12 @@ public class CartRepositoryImpl implements CartRepository {
 
     @Override
     public Cart save(Cart cart) {
-        entityManager.persist(cart);
-        return cart;
-    }
-
-    @Override
-    public Cart update(Cart cart) {
-        return entityManager.merge(cart);
+        if (cart.getId() == 0) {
+            entityManager.persist(cart); // new cart
+            return cart;
+        } else {
+            return entityManager.merge(cart); // existing cart
+        }
     }
 
     @Override
@@ -41,7 +40,6 @@ public class CartRepositoryImpl implements CartRepository {
                     )
                     .setParameter("userId", userId)
                     .getSingleResult();
-
             return Optional.of(cart);
         } catch (NoResultException e) {
             return Optional.empty();

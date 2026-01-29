@@ -8,11 +8,11 @@ public interface CartService {
 
     Cart save(Cart cart);
 
-    Cart update(Cart cart);
-
     Optional<Cart> findById(int id);
 
     Optional<Cart> findByUserId(int userId);
 
     void deleteById(int id);
+
+    boolean isOwner(int cartId, int userId);
 }

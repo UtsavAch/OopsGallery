@@ -1,5 +1,6 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.models.Cart;
 import com.utsav.arts.models.CartItem;
 import com.utsav.arts.repository.CartItemRepository;
 import jakarta.transaction.Transactional;
@@ -13,36 +14,52 @@ import java.util.Optional;
 public class CartItemServiceImpl implements CartItemService {
 
     private final CartItemRepository cartItemRepository;
+    private final CartService cartService;
 
-    public CartItemServiceImpl(CartItemRepository cartItemRepository) {
+    public CartItemServiceImpl(CartItemRepository cartItemRepository,
+                               CartService cartService) {
         this.cartItemRepository = cartItemRepository;
+        this.cartService = cartService;
     }
 
     @Override
     public CartItem save(CartItem cartItem) {
-        // Check for existing cart item with same artwork
-        Optional<CartItem> existingItem =
-                cartItemRepository.findByCartIdAndArtworkId(
-                        cartItem.getCart().getId(),
-                        cartItem.getArtwork().getId()
-                );
+        // Check if same artwork already exists in cart
+        Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndArtworkId(
+                cartItem.getCart().getId(),
+                cartItem.getArtwork().getId()
+        );
+
+        CartItem result;
         if (existingItem.isPresent()) {
-            // If it exists, increase quantity
+            // If exists, increase quantity
             CartItem item = existingItem.get();
             item.setQuantity(item.getQuantity() + cartItem.getQuantity());
-            return cartItemRepository.update(item);
+            result = cartItemRepository.update(item);
+        } else {
+            result = cartItemRepository.save(cartItem);
         }
 
-        return cartItemRepository.save(cartItem);
+        // Recalculate and save cart totals automatically
+        Cart cart = cartItem.getCart();
+        cartService.save(cart);
+
+        return result;
     }
 
     @Override
     public CartItem update(CartItem cartItem) {
-        // Ensure the item exists before updating
+        // Ensure item exists
         cartItemRepository.findById(cartItem.getId())
                 .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
 
-        return cartItemRepository.update(cartItem);
+        CartItem updatedItem = cartItemRepository.update(cartItem);
+
+        // Update cart totals automatically
+        Cart cart = cartItem.getCart();
+        cartService.save(cart);
+
+        return updatedItem;
     }
 
     @Override
@@ -62,20 +79,31 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public void deleteById(int id) {
-        if (cartItemRepository.findById(id).isEmpty()) {
-            throw new IllegalArgumentException("CartItem not found");
-        }
+        CartItem item = cartItemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
+
+        Cart cart = item.getCart();
+
         cartItemRepository.deleteById(id);
+
+        // Update cart totals automatically
+        cartService.save(cart);
     }
 
     @Override
     public void deleteByCartId(int cartId) {
+        Cart cart = cartService.findById(cartId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+
         cartItemRepository.deleteByCartId(cartId);
+
+        // Update cart totals automatically
+        cartService.save(cart);
     }
 
-    public boolean isOwnerOfItem(int itemId, String userEmail) {
-        return findById(itemId)
-                .map(item -> item.getCart().getUser().getEmail().equals(userEmail))
+    public boolean isOwner(int cartItemId, int userId) {
+        return cartItemRepository.findById(cartItemId)
+                .map(item -> item.getCart().getUser().getId() == userId)
                 .orElse(false);
     }
 }

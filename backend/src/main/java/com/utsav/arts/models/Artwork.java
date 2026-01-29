@@ -2,6 +2,8 @@ package com.utsav.arts.models;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "artworks")
 public class Artwork {
@@ -19,14 +21,14 @@ public class Artwork {
 
     private String label;
 
-    private int price;
+    private BigDecimal price;
 
     private String imgUrl;
 
     public Artwork() {}
 
     // Constructor for convenience
-    public Artwork(int id, String title, String description, String category, String label, int price,String imgUrl) {
+    public Artwork(int id, String title, String description, String category, String label, BigDecimal price,String imgUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -52,8 +54,8 @@ public class Artwork {
     public String getLabel() { return label; }
     public void setLabel(String label) { this.label = label; }
 
-    public int getPrice() { return price; }
-    public void setPrice(int price) { this.price = price; }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
     public String getImgUrl() { return imgUrl; }
     public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }

@@ -30,7 +30,7 @@ public class CartController {
 
     // ---------------- CREATE CART ----------------
     @PostMapping
-    @PreAuthorize("hasRole('USER')") // Only regular users should be able to CREATE a cart
+    @PreAuthorize("hasRole('OWNER') or #requestDTO.userId == authentication.principal.id")
     public ResponseEntity<CartResponseDTO> save(
             @RequestBody CartRequestDTO requestDTO
     ) {
@@ -48,6 +48,7 @@ public class CartController {
 
     // ---------------- READ ----------------
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<CartResponseDTO> findById(
             @PathVariable int id
     ) {
@@ -60,7 +61,7 @@ public class CartController {
     @GetMapping("/user/{userId}")
     // Logic: If you are an owner, you get in.
     // If you are a user, we check if the cart you are requesting belongs to your email.
-    @PreAuthorize("hasRole('OWNER') or @cartService.findByUserId(#userId).get().user.email == authentication.name")
+    @PreAuthorize("hasRole('OWNER') or #userId == authentication.principal.id")
     public ResponseEntity<CartResponseDTO> findByUserId(
             @PathVariable int userId
     ) {
@@ -72,6 +73,7 @@ public class CartController {
 
     // ---------------- DELETE ----------------
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
         cartService.deleteById(id);
         return ResponseEntity.noContent().build();

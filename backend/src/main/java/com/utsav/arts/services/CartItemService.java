@@ -21,5 +21,5 @@ public interface CartItemService {
 
     void deleteByCartId(int cartId);
 
-    boolean isOwnerOfItem(int itemId, String userEmail);
+    boolean isOwner(int cartItemId, int userId);
 }

@@ -19,21 +19,15 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart save(Cart cart) {
-        // Ensure user has only one cart
-        cartRepository.findByUserId(cart.getUser().getId())
-                .ifPresent(existing -> {
-                    throw new IllegalArgumentException("User already has a cart");
-                });
-
+        if (cart.getId() == 0) {
+            // New cart
+            cartRepository.findByUserId(cart.getUser().getId())
+                    .ifPresent(existing -> {
+                        throw new IllegalArgumentException("User already has a cart");
+                    });
+        } // Existing cart
+        cart.recalculateTotals();
         return cartRepository.save(cart);
-    }
-
-    @Override
-    public Cart update(Cart cart) {
-        cartRepository.findById(cart.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
-
-        return cartRepository.update(cart);
     }
 
     @Override
@@ -52,5 +46,11 @@ public class CartServiceImpl implements CartService {
             throw new IllegalArgumentException("Cart not found");
         }
         cartRepository.deleteById(id);
+    }
+
+    public boolean isOwner(int cartId, int userId) {
+        return cartRepository.findById(cartId)
+                .map(cart -> cart.getUser().getId() == userId)
+                .orElse(false);
     }
 }

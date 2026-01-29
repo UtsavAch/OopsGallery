@@ -8,8 +8,6 @@ public interface CartRepository {
 
     Cart save(Cart cart);
 
-    Cart update(Cart cart);
-
     Optional<Cart> findById(int id);
 
     Optional<Cart> findByUserId(int userId);
