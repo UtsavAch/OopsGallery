@@ -22,4 +22,8 @@ public interface CartItemService {
     void deleteByCartId(int cartId);
 
     boolean isOwner(int cartItemId, int userId);
+
+    void decreaseQuantity(int cartItemId);
+
+    void increaseQuantity(int cartItemId);
 }

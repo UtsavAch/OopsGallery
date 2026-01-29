@@ -101,4 +101,19 @@ public class CartItemController {
         cartItemService.deleteByCartId(cartId);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/decrease")
+    @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
+    public ResponseEntity<Void> decreaseQuantity(@PathVariable int id) {
+        cartItemService.decreaseQuantity(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/increase")
+    @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
+    public ResponseEntity<Void> increaseQuantity(@PathVariable int id) {
+        cartItemService.increaseQuantity(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

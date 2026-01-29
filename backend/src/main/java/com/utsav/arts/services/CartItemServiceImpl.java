@@ -24,7 +24,13 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public CartItem save(CartItem cartItem) {
-        // Check if same artwork already exists in cart
+
+        validateQuantity(cartItem.getQuantity());
+
+        if (cartItem.getQuantity() == 0) {
+            throw new IllegalArgumentException("Quantity must be at least 1 when adding to cart");
+        }
+
         Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndArtworkId(
                 cartItem.getCart().getId(),
                 cartItem.getArtwork().getId()
@@ -32,7 +38,6 @@ public class CartItemServiceImpl implements CartItemService {
 
         CartItem result;
         if (existingItem.isPresent()) {
-            // If exists, increase quantity
             CartItem item = existingItem.get();
             item.setQuantity(item.getQuantity() + cartItem.getQuantity());
             result = cartItemRepository.update(item);
@@ -40,24 +45,30 @@ public class CartItemServiceImpl implements CartItemService {
             result = cartItemRepository.save(cartItem);
         }
 
-        // Recalculate and save cart totals automatically
-        Cart cart = cartItem.getCart();
-        cartService.save(cart);
-
+        cartService.save(cartItem.getCart());
         return result;
     }
 
     @Override
     public CartItem update(CartItem cartItem) {
-        // Ensure item exists
-        cartItemRepository.findById(cartItem.getId())
+
+        CartItem existingItem = cartItemRepository.findById(cartItem.getId())
                 .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
 
-        CartItem updatedItem = cartItemRepository.update(cartItem);
+        int qty = cartItem.getQuantity();
+        validateQuantity(qty);
 
-        // Update cart totals automatically
-        Cart cart = cartItem.getCart();
-        cartService.save(cart);
+        // Quantity 0 → remove item
+        if (qty == 0) {
+            cartItemRepository.deleteById(existingItem.getId());
+            cartService.save(existingItem.getCart());
+            return null; // controller can handle this cleanly
+        }
+
+        existingItem.setQuantity(qty);
+
+        CartItem updatedItem = cartItemRepository.update(existingItem);
+        cartService.save(existingItem.getCart());
 
         return updatedItem;
     }
@@ -106,4 +117,42 @@ public class CartItemServiceImpl implements CartItemService {
                 .map(item -> item.getCart().getUser().getId() == userId)
                 .orElse(false);
     }
+
+    @Override
+    public void decreaseQuantity(int cartItemId) {
+        CartItem item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
+
+        int newQty = item.getQuantity() - 1;
+        validateQuantity(newQty);
+
+        if (newQty == 0) {
+            cartItemRepository.deleteById(cartItemId);
+        } else {
+            item.setQuantity(newQty);
+            cartItemRepository.update(item);
+        }
+
+        cartService.save(item.getCart());
+    }
+
+    @Override
+    public void increaseQuantity(int cartItemId) {
+        CartItem item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
+
+        int newQty = item.getQuantity() + 1;
+        validateQuantity(newQty);
+
+        item.setQuantity(newQty);
+        cartItemRepository.update(item);
+
+        cartService.save(item.getCart());
+    }
+    private void validateQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
+    }
+
 }
