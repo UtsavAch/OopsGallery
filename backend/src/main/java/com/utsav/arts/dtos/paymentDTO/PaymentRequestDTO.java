@@ -1,13 +1,15 @@
 package com.utsav.arts.dtos.paymentDTO;
 
+import java.math.BigDecimal;
+
 public class PaymentRequestDTO {
 
     private int orderId;
     private int userId;
-    private int amount;
+    private BigDecimal amount;
     private String currency;
     private String method;
-    private String status;
+    private String status;          // Can be "PENDING", "SUCCESS", etc.
     private String transactionId;
 
     public PaymentRequestDTO() {}
@@ -18,8 +20,8 @@ public class PaymentRequestDTO {
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
 
-    public int getAmount() { return amount; }
-    public void setAmount(int amount) { this.amount = amount; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }

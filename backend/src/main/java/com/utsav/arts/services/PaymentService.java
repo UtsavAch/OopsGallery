@@ -1,6 +1,7 @@
 package com.utsav.arts.services;
 
 import com.utsav.arts.models.Payment;
+import com.utsav.arts.models.PaymentStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,11 +20,11 @@ public interface PaymentService {
 
     List<Payment> findByOrderId(int orderId);
 
-    List<Payment> findByStatus(String status);
+    List<Payment> findByStatus(PaymentStatus status);
 
     List<Payment> findAll();
 
     void deleteById(int id);
 
-    boolean isPaymentOwner(int paymentId, String email);
+    boolean isPaymentOwner(int paymentId, int userId);
 }

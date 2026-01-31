@@ -1,6 +1,7 @@
 package com.utsav.arts.repository;
 
 import com.utsav.arts.models.Payment;
+import com.utsav.arts.models.PaymentStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -70,7 +71,7 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public List<Payment> findByStatus(String status) {
+    public List<Payment> findByStatus(PaymentStatus status) {
         return entityManager.createQuery(
                         "SELECT p FROM Payment p WHERE p.status = :status ORDER BY p.createdAt DESC",
                         Payment.class

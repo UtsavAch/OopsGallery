@@ -1,6 +1,8 @@
 package com.utsav.arts.models;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -19,13 +21,15 @@ public class Payment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private int amount;
+    @Column(nullable = false)
+    private BigDecimal amount;
 
     private String currency;   // "EUR", "USD", etc.
 
     private String method;     // "CARD", "UPI", "PAYPAL"
 
-    private String status;     // "PENDING", "SUCCESS", "FAILED", "REFUNDED"
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status; // PENDING, SUCCESS, FAILED, REFUNDED
 
     private String transactionId; // from payment gateway
 
@@ -36,7 +40,7 @@ public class Payment {
     public Payment() {}
 
     // Convenience constructor
-    public Payment(int id, Orders order, User user, int amount, String currency, String method, String status, String transactionId, LocalDateTime createdAt) {
+    public Payment(int id, Orders order, User user, BigDecimal amount, String currency, String method, PaymentStatus status, String transactionId, LocalDateTime createdAt) {
         this.id = id;
         this.order = order;
         this.user = user;
@@ -58,8 +62,8 @@ public class Payment {
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
-    public int getAmount() { return amount; }
-    public void setAmount(int amount) { this.amount = amount; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
@@ -67,8 +71,8 @@ public class Payment {
     public String getMethod() { return method; }
     public void setMethod(String method) { this.method = method; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public PaymentStatus getStatus() { return status; }
+    public void setStatus(PaymentStatus status) { this.status = status; }
 
     public String getTransactionId() { return transactionId; }
     public void setTransactionId(String transactionId) { this.transactionId = transactionId; }

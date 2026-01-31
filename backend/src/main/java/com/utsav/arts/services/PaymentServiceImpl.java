@@ -1,6 +1,7 @@
 package com.utsav.arts.services;
 
 import com.utsav.arts.models.Payment;
+import com.utsav.arts.models.PaymentStatus;
 import com.utsav.arts.repository.PaymentRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -21,14 +22,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Payment save(Payment payment) {
-        // Set creation timestamp if not provided
         if (payment.getCreatedAt() == null) {
             payment.setCreatedAt(LocalDateTime.now());
         }
 
-        // Default status if not provided
-        if (payment.getStatus() == null || payment.getStatus().isBlank()) {
-            payment.setStatus("PENDING");
+        if (payment.getStatus() == null) {
+            payment.setStatus(PaymentStatus.PENDING);
         }
 
         return paymentRepository.save(payment);
@@ -63,7 +62,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<Payment> findByStatus(String status) {
+    public List<Payment> findByStatus(PaymentStatus status) {
         return paymentRepository.findByStatus(status);
     }
 
@@ -81,9 +80,9 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public boolean isPaymentOwner(int paymentId, String email) {
+    public boolean isPaymentOwner(int paymentId, int userId) {
         return findById(paymentId)
-                .map(payment -> payment.getUser().getEmail().equals(email))
+                .map(payment -> payment.getUser().getId() == userId)
                 .orElse(false);
     }
 }

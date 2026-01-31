@@ -1,6 +1,7 @@
 package com.utsav.arts.repository;
 
 import com.utsav.arts.models.Payment;
+import com.utsav.arts.models.PaymentStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +20,7 @@ public interface PaymentRepository {
 
     List<Payment> findByOrderId(int orderId);
 
-    List<Payment> findByStatus(String status);
+    List<Payment> findByStatus(PaymentStatus status);
 
     List<Payment> findAll();
 
