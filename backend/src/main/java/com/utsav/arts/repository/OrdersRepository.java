@@ -1,5 +1,6 @@
 package com.utsav.arts.repository;
 
+import com.utsav.arts.models.OrderStatus;
 import com.utsav.arts.models.Orders;
 
 import java.util.List;
@@ -17,9 +18,11 @@ public interface OrdersRepository {
 
     List<Orders> findByUserId(int userId);
 
+    // Useful for: "Show me all orders that contain this specific artwork"
     List<Orders> findByArtworkId(int artworkId);
 
-    List<Orders> findByStatus(String status);
+    // Updated to use strict Enum type
+    List<Orders> findByStatus(OrderStatus status);
 
     void deleteById(int id);
 }

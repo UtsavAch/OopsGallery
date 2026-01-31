@@ -1,5 +1,6 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.models.OrderStatus;
 import com.utsav.arts.models.Orders;
 
 import java.util.List;
@@ -7,9 +8,9 @@ import java.util.Optional;
 
 public interface OrdersService {
 
-    Orders save(Orders order);
+    Orders placeOrder(int userId, String address);
 
-    Orders update(Orders order);
+    Orders updateStatus(int orderId, OrderStatus status);
 
     Optional<Orders> findById(int id);
 
@@ -17,11 +18,9 @@ public interface OrdersService {
 
     List<Orders> findByUserId(int userId);
 
-    List<Orders> findByArtworkId(int artworkId);
-
-    List<Orders> findByStatus(String status);
+    List<Orders> findByStatus(OrderStatus status);
 
     void deleteById(int id);
 
-    boolean isOrderOwner(int orderId, String email);
+    boolean isOwner(int orderId, int userId);
 }

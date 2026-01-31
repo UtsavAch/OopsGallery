@@ -1,5 +1,6 @@
 package com.utsav.arts.dtos.cartDTO;
 
+import com.utsav.arts.dtos.cartItemDTO.CartItemResponseDTO;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -7,7 +8,7 @@ public class CartResponseDTO {
 
     private int id;
     private int userId;
-    private List<Integer> cartItems;
+    private List<CartItemResponseDTO> cartItems;
     private int totalItems;
     private BigDecimal totalPrice;
 
@@ -19,8 +20,8 @@ public class CartResponseDTO {
     public int getUserId() { return userId; }
     public void setUserId(int userId) { this.userId = userId; }
 
-    public List<Integer> getCartItems() { return cartItems; }
-    public void setCartItems(List<Integer> cartItems) {
+    public List<CartItemResponseDTO> getCartItems() { return cartItems; }
+    public void setCartItems(List<CartItemResponseDTO> cartItems) {
         this.cartItems = cartItems;
     }
 

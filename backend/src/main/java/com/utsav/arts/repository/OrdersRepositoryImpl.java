@@ -1,5 +1,6 @@
 package com.utsav.arts.repository;
 
+import com.utsav.arts.models.OrderStatus;
 import com.utsav.arts.models.Orders;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -18,6 +19,7 @@ public class OrdersRepositoryImpl implements OrdersRepository {
 
     @Override
     public Orders save(Orders order) {
+        // Because of CascadeType.ALL, this saves the Order AND all its OrderItems automatically.
         entityManager.persist(order);
         return order;
     }
@@ -52,8 +54,10 @@ public class OrdersRepositoryImpl implements OrdersRepository {
 
     @Override
     public List<Orders> findByArtworkId(int artworkId) {
+        // FIXED: Joined 'orderItems' because 'Orders' no longer has a direct 'artwork' field.
+        // DISTINCT is used so we don't get duplicate Orders if the same order has the artwork listed twice (rare, but safe).
         return entityManager.createQuery(
-                        "SELECT o FROM Orders o WHERE o.artwork.id = :artworkId ORDER BY o.orderedAt DESC",
+                        "SELECT DISTINCT o FROM Orders o JOIN o.orderItems oi WHERE oi.artwork.id = :artworkId ORDER BY o.orderedAt DESC",
                         Orders.class
                 )
                 .setParameter("artworkId", artworkId)
@@ -61,7 +65,7 @@ public class OrdersRepositoryImpl implements OrdersRepository {
     }
 
     @Override
-    public List<Orders> findByStatus(String status) {
+    public List<Orders> findByStatus(OrderStatus status) {
         return entityManager.createQuery(
                         "SELECT o FROM Orders o WHERE o.status = :status ORDER BY o.orderedAt DESC",
                         Orders.class

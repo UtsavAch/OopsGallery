@@ -1,10 +1,14 @@
 package com.utsav.arts.services;
 
-import com.utsav.arts.models.Orders;
+import com.utsav.arts.models.*;
+import com.utsav.arts.repository.CartRepository;
 import com.utsav.arts.repository.OrdersRepository;
+import com.utsav.arts.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,31 +17,70 @@ import java.util.Optional;
 public class OrdersServiceImpl implements OrdersService {
 
     private final OrdersRepository ordersRepository;
+    private final CartRepository cartRepository;
+    private final UserRepository userRepository;
+    private final CartItemService cartItemService;
 
-    public OrdersServiceImpl(OrdersRepository ordersRepository) {
+    public OrdersServiceImpl(OrdersRepository ordersRepository,
+                             CartRepository cartRepository,
+                             UserRepository userRepository,
+                             CartItemService cartItemService) {
         this.ordersRepository = ordersRepository;
+        this.cartRepository = cartRepository;
+        this.userRepository = userRepository;
+        this.cartItemService = cartItemService;
     }
 
     @Override
-    public Orders save(Orders order) {
-        // Set order timestamp if not already set
-        if (order.getOrderedAt() == null) {
-            order.setOrderedAt(java.time.LocalDateTime.now());
+    public Orders placeOrder(int userId, String address) {
+
+        // 1. Fetch User
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 2. Fetch Cart
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+
+        if (cart.getItems() == null || cart.getItems().isEmpty()) {
+            throw new IllegalArgumentException("Cannot place order: Cart is empty");
         }
 
-        // Initial status if not set
-        if (order.getStatus() == null || order.getStatus().isBlank()) {
-            order.setStatus("PENDING");
+        Orders order = new Orders();
+        order.setUser(user);
+        order.setAddress(address);
+        order.setStatus(OrderStatus.PENDING);
+        order.setOrderedAt(LocalDateTime.now());
+
+        int total = 0;
+
+        for (CartItem cartItem : cart.getItems()) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setArtwork(cartItem.getArtwork());
+            orderItem.setQuantity(cartItem.getQuantity());
+
+            BigDecimal price = cartItem.getArtwork().getPrice();
+            orderItem.setPriceAtPurchase(price);
+
+            order.addOrderItem(orderItem);
+            total += price.multiply(BigDecimal.valueOf(cartItem.getQuantity())).intValue();
         }
 
-        return ordersRepository.save(order);
+        order.setTotalPrice(BigDecimal.valueOf(total));
+
+        Orders saved = ordersRepository.save(order);
+
+        cartItemService.deleteByCartId(cart.getId());
+
+        return saved;
     }
 
     @Override
-    public Orders update(Orders order) {
-        ordersRepository.findById(order.getId())
+    public Orders updateStatus(int orderId, OrderStatus status) {
+        Orders order = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found"));
 
+        order.setStatus(status);
         return ordersRepository.update(order);
     }
 
@@ -57,27 +100,19 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<Orders> findByArtworkId(int artworkId) {
-        return ordersRepository.findByArtworkId(artworkId);
-    }
-
-    @Override
-    public List<Orders> findByStatus(String status) {
+    public List<Orders> findByStatus(OrderStatus status) {
         return ordersRepository.findByStatus(status);
     }
 
     @Override
     public void deleteById(int id) {
-        if (ordersRepository.findById(id).isEmpty()) {
-            throw new IllegalArgumentException("Order not found");
-        }
         ordersRepository.deleteById(id);
     }
 
     @Override
-    public boolean isOrderOwner(int orderId, String email) {
-        return findById(orderId)
-                .map(order -> order.getUser().getEmail().equals(email))
-                .orElse(false); // If order doesn't exist, access is denied safely
+    public boolean isOwner(int orderId, int userId) {
+        return ordersRepository.findById(orderId)
+                .map(order -> order.getUser().getId() == userId)
+                .orElse(false);
     }
 }

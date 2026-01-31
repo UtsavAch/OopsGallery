@@ -1,26 +1,18 @@
 package com.utsav.arts.dtos.ordersDTO;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class OrdersRequestDTO {
 
-    private int userId;
-    private int artworkId;
-    private int price;
+    @NotBlank(message = "Delivery address is required")
     private String address;
-    private String status;
 
-    // Getters and setters
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public String getAddress() {
+        return address;
+    }
 
-    public int getArtworkId() { return artworkId; }
-    public void setArtworkId(int artworkId) { this.artworkId = artworkId; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    public int getPrice() { return price; }
-    public void setPrice(int price) { this.price = price; }
-
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
 }
