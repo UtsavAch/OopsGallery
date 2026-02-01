@@ -2,10 +2,12 @@ package com.utsav.arts.controllers;
 
 import com.utsav.arts.dtos.userDTO.UserRequestDTO;
 import com.utsav.arts.dtos.userDTO.UserResponseDTO;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.mappers.UserMapper;
 import com.utsav.arts.models.Role;
 import com.utsav.arts.models.User;
 import com.utsav.arts.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,7 +28,7 @@ public class UserController {
 
     // ---------------- CREATE ----------------
     @PostMapping
-    public ResponseEntity<UserResponseDTO> save(@RequestBody UserRequestDTO requestDTO) {
+    public ResponseEntity<UserResponseDTO> save(@Valid @RequestBody UserRequestDTO requestDTO) {
         User user = UserMapper.toEntity(requestDTO);
         user.setRole(Role.ROLE_USER);
         User savedUser = userService.save(user);
@@ -41,7 +43,7 @@ public class UserController {
     @PreAuthorize("hasRole('OWNER') or #id == authentication.principal.id")
     public ResponseEntity<UserResponseDTO> update(
             @PathVariable int id,
-            @RequestBody UserRequestDTO requestDTO
+            @Valid @RequestBody UserRequestDTO requestDTO
     ) {
         User user = UserMapper.toEntity(requestDTO);
         user.setId(id);
@@ -53,16 +55,20 @@ public class UserController {
     // ---------------- READ ----------------
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> findById(@PathVariable int id) {
-        return userService.findById(id)
-                .map(user -> ResponseEntity.ok(UserMapper.toResponseDTO(user)))
-                .orElse(ResponseEntity.notFound().build());
+        // Proper: Throwing exception triggers GlobalExceptionHandler's JSON response
+        User user = userService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        return ResponseEntity.ok(UserMapper.toResponseDTO(user));
     }
 
     @GetMapping("/email/{email}")
     public ResponseEntity<UserResponseDTO> findByEmail(@PathVariable String email) {
-        return userService.findByEmail(email)
-                .map(user -> ResponseEntity.ok(UserMapper.toResponseDTO(user)))
-                .orElse(ResponseEntity.notFound().build());
+        // Proper: Throwing exception triggers GlobalExceptionHandler's JSON response
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+
+        return ResponseEntity.ok(UserMapper.toResponseDTO(user));
     }
 
     @GetMapping

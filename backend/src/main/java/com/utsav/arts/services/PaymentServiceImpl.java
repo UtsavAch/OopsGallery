@@ -1,5 +1,6 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.models.Payment;
 import com.utsav.arts.models.PaymentStatus;
 import com.utsav.arts.repository.PaymentRepository;
@@ -35,8 +36,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Payment update(Payment payment) {
+        // Use ResourceNotFoundException for proper 404 response
         paymentRepository.findById(payment.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + payment.getId()));
 
         return paymentRepository.update(payment);
     }
@@ -73,8 +75,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void deleteById(int id) {
+        // Ensure consistent 404 behavior for deletions
         if (paymentRepository.findById(id).isEmpty()) {
-            throw new IllegalArgumentException("Payment not found");
+            throw new ResourceNotFoundException("Cannot delete: Payment not found with id: " + id);
         }
         paymentRepository.deleteById(id);
     }

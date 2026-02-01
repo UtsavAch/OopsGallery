@@ -2,6 +2,8 @@ package com.utsav.arts.controllers;
 
 import com.utsav.arts.dtos.paymentDTO.PaymentRequestDTO;
 import com.utsav.arts.dtos.paymentDTO.PaymentResponseDTO;
+import com.utsav.arts.exceptions.InvalidRequestException;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.mappers.PaymentMapper;
 import com.utsav.arts.models.Orders;
 import com.utsav.arts.models.Payment;
@@ -10,6 +12,7 @@ import com.utsav.arts.models.User;
 import com.utsav.arts.services.OrdersService;
 import com.utsav.arts.services.PaymentService;
 import com.utsav.arts.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,12 +39,13 @@ public class PaymentController {
     // ---------------- CREATE ----------------
     @PostMapping
     @PreAuthorize("hasRole('OWNER') or #requestDTO.userId == authentication.principal.id")
-    public ResponseEntity<PaymentResponseDTO> save(@RequestBody PaymentRequestDTO requestDTO) {
+    public ResponseEntity<PaymentResponseDTO> save(@Valid @RequestBody PaymentRequestDTO requestDTO) {
+        // Use ResourceNotFoundException for consistent 404 messaging
         User user = userService.findById(requestDTO.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment failed: User not found with id: " + requestDTO.getUserId()));
 
         Orders order = ordersService.findById(requestDTO.getOrderId())
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Payment failed: Order not found with id: " + requestDTO.getOrderId()));
 
         Payment payment = PaymentMapper.toEntity(requestDTO, order, user);
         Payment savedPayment = paymentService.save(payment);
@@ -53,14 +57,19 @@ public class PaymentController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @paymentService.isPaymentOwner(#id, authentication.principal.id)")
     public ResponseEntity<PaymentResponseDTO> findById(@PathVariable int id) {
-        return paymentService.findById(id)
-                .map(payment -> ResponseEntity.ok(PaymentMapper.toResponseDTO(payment)))
-                .orElse(ResponseEntity.notFound().build());
+        Payment payment = paymentService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment record not found with id: " + id));
+
+        return ResponseEntity.ok(PaymentMapper.toResponseDTO(payment));
     }
 
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('OWNER') or #userId == authentication.principal.id")
     public ResponseEntity<List<PaymentResponseDTO>> findByUserId(@PathVariable int userId) {
+        // Verify user exists to avoid returning empty lists for non-existent users
+        userService.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+
         List<PaymentResponseDTO> payments = paymentService.findByUserId(userId)
                 .stream()
                 .map(PaymentMapper::toResponseDTO)
@@ -69,7 +78,7 @@ public class PaymentController {
     }
 
     @GetMapping("/order/{orderId}")
-    @PreAuthorize("hasRole('OWNER') or @ordersService.isOrderOwner(#orderId, authentication.principal.id)")
+    @PreAuthorize("hasRole('OWNER') or @ordersService.isOwner(#orderId, authentication.principal.id)")
     public ResponseEntity<List<PaymentResponseDTO>> findByOrderId(@PathVariable int orderId) {
         List<PaymentResponseDTO> payments = paymentService.findByOrderId(orderId)
                 .stream()
@@ -85,7 +94,8 @@ public class PaymentController {
         try {
             paymentStatus = PaymentStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            // Throwing our custom InvalidRequestException for a clean 400 Bad Request
+            throw new InvalidRequestException("Invalid payment status: " + status);
         }
 
         List<PaymentResponseDTO> payments = paymentService.findByStatus(paymentStatus)
@@ -109,6 +119,7 @@ public class PaymentController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
+        // Service now handles the ResourceNotFoundException
         paymentService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

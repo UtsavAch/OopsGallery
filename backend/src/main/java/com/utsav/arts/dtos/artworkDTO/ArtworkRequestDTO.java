@@ -1,18 +1,35 @@
 package com.utsav.arts.dtos.artworkDTO;
 
+import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
 public class ArtworkRequestDTO {
 
+    @NotBlank(message = "Title is required")
+    @Size(max = 100, message = "Title cannot exceed 100 characters")
     private String title;
+
+    @NotBlank(message = "Description is required")
+    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
+
+    @NotBlank(message = "Category is required")
     private String category;
-    private String label;
+
+    private String label; // Optional field, no NotBlank needed
+
+    @NotNull(message = "Price is required")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
     private BigDecimal price;
+
+    @NotBlank(message = "Image URL is required")
+    @Pattern(regexp = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
+            message = "Please provide a valid URL for the image")
     private String imgUrl;
 
     public ArtworkRequestDTO() {}
 
+    // Getters & Setters
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 

@@ -1,5 +1,7 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.exceptions.ResourceAlreadyExistsException;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.models.User;
 import com.utsav.arts.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -24,9 +26,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User save(User user) {
-        // Email must be unique
+        //Email must be unique
         if (userRepository.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new ResourceAlreadyExistsException("User with email " + user.getEmail() + " already exists.");
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
@@ -34,8 +36,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(User user) {
+        // Check existence before update
         User existingUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + user.getId()));
 
         existingUser.setFirstName(user.getFirstName());
         existingUser.setLastName(user.getLastName());
@@ -43,15 +46,15 @@ public class UserServiceImpl implements UserService {
         existingUser.setAddress(user.getAddress());
         existingUser.setRole(user.getRole());
 
-        // Email change
+        // Business Rule: If email is changing, it must not collide with another user
         if (!existingUser.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(user.getEmail())) {
-                throw new IllegalArgumentException("Email already exists");
+                throw new ResourceAlreadyExistsException("Email " + user.getEmail() + " is already taken.");
             }
             existingUser.setEmail(user.getEmail());
         }
 
-        // Password change
+        // Only encode and update password if a new one is provided
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
@@ -61,6 +64,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> findById(int id) {
+        // Return Optional so the Controller can decide whether to throw or return 404
         return userRepository.findById(id);
     }
 
@@ -76,8 +80,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteById(int id) {
+        // Updated: Use ResourceNotFoundException instead of IllegalArgumentException
         if (userRepository.findById(id).isEmpty()) {
-            throw new IllegalArgumentException("User not found");
+            throw new ResourceNotFoundException("Cannot delete: User not found with id: " + id);
         }
         userRepository.deleteById(id);
     }

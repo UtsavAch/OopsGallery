@@ -2,9 +2,11 @@ package com.utsav.arts.controllers;
 
 import com.utsav.arts.dtos.artworkDTO.ArtworkRequestDTO;
 import com.utsav.arts.dtos.artworkDTO.ArtworkResponseDTO;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.mappers.ArtworkMapper;
 import com.utsav.arts.models.Artwork;
 import com.utsav.arts.services.ArtworkService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,7 +29,7 @@ public class ArtworkController {
     @PostMapping
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ArtworkResponseDTO> save(
-            @RequestBody ArtworkRequestDTO requestDTO
+            @Valid @RequestBody ArtworkRequestDTO requestDTO
     ) {
         Artwork artwork = ArtworkMapper.toEntity(requestDTO);
         Artwork savedArtwork = artworkService.save(artwork);
@@ -43,9 +45,8 @@ public class ArtworkController {
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<ArtworkResponseDTO> update(
             @PathVariable int id,
-            @RequestBody ArtworkRequestDTO requestDTO
+            @Valid @RequestBody ArtworkRequestDTO requestDTO
     ) {
-
         Artwork artwork = ArtworkMapper.toEntity(requestDTO);
         Artwork updatedArtwork = artworkService.update(id, artwork);
 
@@ -57,9 +58,10 @@ public class ArtworkController {
     // ---------------- READ ----------------
     @GetMapping("/{id}")
     public ResponseEntity<ArtworkResponseDTO> findById(@PathVariable int id) {
-        return artworkService.findById(id)
-                .map(a -> ResponseEntity.ok(ArtworkMapper.toResponseDTO(a)))
-                .orElse(ResponseEntity.notFound().build());
+        Artwork artwork = artworkService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Artwork not found with id: " + id));
+
+        return ResponseEntity.ok(ArtworkMapper.toResponseDTO(artwork));
     }
 
     @GetMapping
@@ -88,6 +90,7 @@ public class ArtworkController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
+        // The service already throws ResourceNotFoundException if ID doesn't exist
         artworkService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

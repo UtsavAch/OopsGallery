@@ -1,8 +1,18 @@
 package com.utsav.arts.dtos.loginDTO;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public class LoginRequestDTO {
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email address")
     private String email;
+
+    @NotBlank(message = "Password is required")
     private String password;
+
+    public LoginRequestDTO() {}
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }

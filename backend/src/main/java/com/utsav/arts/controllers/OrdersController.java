@@ -3,10 +3,13 @@ package com.utsav.arts.controllers;
 import com.utsav.arts.configurations.UserPrincipal;
 import com.utsav.arts.dtos.ordersDTO.OrdersRequestDTO;
 import com.utsav.arts.dtos.ordersDTO.OrdersResponseDTO;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.mappers.OrdersMapper;
 import com.utsav.arts.models.OrderStatus;
 import com.utsav.arts.models.Orders;
 import com.utsav.arts.services.OrdersService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -30,27 +33,32 @@ public class OrdersController {
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'OWNER')")
     public ResponseEntity<OrdersResponseDTO> placeOrder(
-            @RequestBody OrdersRequestDTO request,
+            @Valid @RequestBody OrdersRequestDTO request,
             Authentication authentication
     ) {
+        // Extract userId from authenticated principal for security
         int userId = ((UserPrincipal) Objects.requireNonNull(authentication.getPrincipal())).getId();
 
+        // Service now handles business logic errors (e.g., empty cart) via InvalidRequestException
         Orders order = ordersService.placeOrder(
                 userId,
                 request.getAddress()
         );
 
-        return ResponseEntity.status(201)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(OrdersMapper.toDTO(order));
     }
+
     // ---------------- READ ----------------
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @ordersService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<OrdersResponseDTO> findById(@PathVariable int id) {
-        return ordersService.findById(id)
-                .map(order -> ResponseEntity.ok(OrdersMapper.toDTO(order)))
-                .orElse(ResponseEntity.notFound().build());
+        // Use orElseThrow to trigger GlobalExceptionHandler's JSON response
+        Orders order = ordersService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+
+        return ResponseEntity.ok(OrdersMapper.toDTO(order));
     }
 
     @GetMapping
@@ -91,13 +99,13 @@ public class OrdersController {
     }
 
     // ---------------- UPDATE ----------------
-    // Only OWNER can change order status
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<OrdersResponseDTO> updateStatus(
             @PathVariable int id,
             @RequestParam OrderStatus status
     ) {
+        // service handles 404 if orderId is invalid
         Orders updated = ordersService.updateStatus(id, status);
         return ResponseEntity.ok(OrdersMapper.toDTO(updated));
     }
@@ -106,6 +114,7 @@ public class OrdersController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> delete(@PathVariable int id) {
+        // service handles 404 if orderId is invalid
         ordersService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

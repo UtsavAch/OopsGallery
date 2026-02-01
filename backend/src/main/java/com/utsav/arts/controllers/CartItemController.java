@@ -2,6 +2,7 @@ package com.utsav.arts.controllers;
 
 import com.utsav.arts.dtos.cartItemDTO.CartItemRequestDTO;
 import com.utsav.arts.dtos.cartItemDTO.CartItemResponseDTO;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.mappers.CartItemMapper;
 import com.utsav.arts.models.Artwork;
 import com.utsav.arts.models.Cart;
@@ -9,6 +10,7 @@ import com.utsav.arts.models.CartItem;
 import com.utsav.arts.services.ArtworkService;
 import com.utsav.arts.services.CartItemService;
 import com.utsav.arts.services.CartService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,12 +39,13 @@ public class CartItemController {
     // ---------------- ADD TO CART ----------------
     @PostMapping
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#requestDTO.cartId, authentication.principal.id)")
-    public ResponseEntity<CartItemResponseDTO> save(@RequestBody CartItemRequestDTO requestDTO) {
+    public ResponseEntity<CartItemResponseDTO> save(@Valid @RequestBody CartItemRequestDTO requestDTO) {
+        // Use ResourceNotFoundException for 404 instead of generic IllegalArgumentException
         Cart cart = cartService.findById(requestDTO.getCartId())
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found with id: " + requestDTO.getCartId()));
 
         Artwork artwork = artworkService.findById(requestDTO.getArtworkId())
-                .orElseThrow(() -> new IllegalArgumentException("Artwork not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artwork not found with id: " + requestDTO.getArtworkId()));
 
         CartItem cartItem = CartItemMapper.toEntity(requestDTO, cart, artwork);
         CartItem savedItem = cartItemService.save(cartItem);
@@ -53,12 +56,12 @@ public class CartItemController {
     // ---------------- UPDATE QUANTITY ----------------
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
-    public ResponseEntity<CartItemResponseDTO> update(@PathVariable int id, @RequestBody CartItemRequestDTO requestDTO) {
+    public ResponseEntity<CartItemResponseDTO> update(@PathVariable int id, @Valid @RequestBody CartItemRequestDTO requestDTO) {
         Cart cart = cartService.findById(requestDTO.getCartId())
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found with id: " + requestDTO.getCartId()));
 
         Artwork artwork = artworkService.findById(requestDTO.getArtworkId())
-                .orElseThrow(() -> new IllegalArgumentException("Artwork not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Artwork not found with id: " + requestDTO.getArtworkId()));
 
         CartItem cartItem = CartItemMapper.toEntity(requestDTO, cart, artwork);
         cartItem.setId(id);
@@ -72,14 +75,21 @@ public class CartItemController {
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<CartItemResponseDTO> findById(@PathVariable int id) {
-        return cartItemService.findById(id)
-                .map(item -> ResponseEntity.ok(CartItemMapper.toResponseDTO(item)))
-                .orElse(ResponseEntity.notFound().build());
+        // Throw exception to trigger GlobalExceptionHandler
+        CartItem item = cartItemService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with id: " + id));
+
+        return ResponseEntity.ok(CartItemMapper.toResponseDTO(item));
     }
 
     @GetMapping("/cart/{cartId}")
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#cartId, authentication.principal.id)")
     public ResponseEntity<List<CartItemResponseDTO>> findByCartId(@PathVariable int cartId) {
+        // Verify cart exists first
+        if (cartService.findById(cartId).isEmpty()) {
+            throw new ResourceNotFoundException("Cart not found with id: " + cartId);
+        }
+
         List<CartItemResponseDTO> items = cartItemService.findByCartId(cartId)
                 .stream()
                 .map(CartItemMapper::toResponseDTO)
@@ -91,14 +101,14 @@ public class CartItemController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
-        cartItemService.deleteById(id);
+        cartItemService.deleteById(id); // Service now handles ResourceNotFoundException
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/cart/{cartId}")
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#cartId, authentication.principal.id)")
     public ResponseEntity<Void> deleteByCartId(@PathVariable int cartId) {
-        cartItemService.deleteByCartId(cartId);
+        cartItemService.deleteByCartId(cartId); // Service now handles ResourceNotFoundException
         return ResponseEntity.noContent().build();
     }
 
@@ -115,5 +125,4 @@ public class CartItemController {
         cartItemService.increaseQuantity(id);
         return ResponseEntity.noContent().build();
     }
-
 }

@@ -23,14 +23,24 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public @NotNull UserDetails loadUserByUsername(@NotNull String email) throws UsernameNotFoundException {
-        // Fetch user from your repository
+        // Validation: Ensure email isn't null or blank before querying the DB
+        if (email.trim().isEmpty()) {
+            throw new UsernameNotFoundException("Email cannot be empty");
+        }
+
+        // Fetch user from repository
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User Not Found with email: " + email));
+
+        // Validation: Ensure the user has a role assigned to avoid NullPointerException in Security context
+        if (user.getRole() == null) {
+            throw new UsernameNotFoundException("User has no assigned roles/authorities");
+        }
 
         // Convert your Enum Role to a Spring Security Authority
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().name());
 
-        // Return a Spring Security User object
+        // Return the UserPrincipal
         return new UserPrincipal(user, Collections.singletonList(authority));
     }
 }

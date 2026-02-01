@@ -1,5 +1,7 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.exceptions.InvalidRequestException;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.models.*;
 import com.utsav.arts.repository.CartRepository;
 import com.utsav.arts.repository.OrdersRepository;
@@ -34,16 +36,17 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public Orders placeOrder(int userId, String address) {
 
-        // 1. Fetch User
+        // 1. Fetch User - Use ResourceNotFoundException (404)
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        // 2. Fetch Cart
+        // 2. Fetch Cart - Use ResourceNotFoundException (404)
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("No active cart found for user id: " + userId));
 
+        // 3. Validate Cart Content - Use InvalidRequestException (400)
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Cannot place order: Cart is empty");
+            throw new InvalidRequestException("Cannot place order: Your cart is empty.");
         }
 
         Orders order = new Orders();
@@ -70,6 +73,7 @@ public class OrdersServiceImpl implements OrdersService {
 
         Orders saved = ordersRepository.save(order);
 
+        // Clear the cart after successful order placement
         cartItemService.deleteByCartId(cart.getId());
 
         return saved;
@@ -77,8 +81,9 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public Orders updateStatus(int orderId, OrderStatus status) {
+        // Use ResourceNotFoundException (404)
         Orders order = ordersRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
 
         order.setStatus(status);
         return ordersRepository.update(order);
@@ -106,6 +111,10 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public void deleteById(int id) {
+        // Ensure the order exists before deleting, or throw 404
+        if (ordersRepository.findById(id).isEmpty()) {
+            throw new ResourceNotFoundException("Cannot delete: Order not found with id: " + id);
+        }
         ordersRepository.deleteById(id);
     }
 

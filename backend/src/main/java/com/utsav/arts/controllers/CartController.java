@@ -2,11 +2,13 @@ package com.utsav.arts.controllers;
 
 import com.utsav.arts.dtos.cartDTO.CartRequestDTO;
 import com.utsav.arts.dtos.cartDTO.CartResponseDTO;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.mappers.CartMapper;
 import com.utsav.arts.models.Cart;
 import com.utsav.arts.models.User;
 import com.utsav.arts.services.CartService;
 import com.utsav.arts.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,10 +34,10 @@ public class CartController {
     @PostMapping
     @PreAuthorize("hasRole('OWNER') or #requestDTO.userId == authentication.principal.id")
     public ResponseEntity<CartResponseDTO> save(
-            @RequestBody CartRequestDTO requestDTO
+            @Valid @RequestBody CartRequestDTO requestDTO
     ) {
         User user = userService.findById(requestDTO.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot create cart: User not found with id: " + requestDTO.getUserId()));
 
         Cart cart = new Cart(user);
         Cart savedCart = cartService.save(cart);
@@ -52,29 +54,28 @@ public class CartController {
     public ResponseEntity<CartResponseDTO> findById(
             @PathVariable int id
     ) {
-        return cartService.findById(id)
-                .map(cart -> ResponseEntity.ok(
-                        CartMapper.toResponseDTO(cart)))
-                .orElse(ResponseEntity.notFound().build());
+        Cart cart = cartService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found with id: " + id));
+
+        return ResponseEntity.ok(CartMapper.toResponseDTO(cart));
     }
 
     @GetMapping("/user/{userId}")
-    // Logic: If you are an owner, you get in.
-    // If you are a user, we check if the cart you are requesting belongs to your email.
     @PreAuthorize("hasRole('OWNER') or #userId == authentication.principal.id")
     public ResponseEntity<CartResponseDTO> findByUserId(
             @PathVariable int userId
     ) {
-        return cartService.findByUserId(userId)
-                .map(cart -> ResponseEntity.ok(
-                        CartMapper.toResponseDTO(cart)))
-                .orElse(ResponseEntity.notFound().build());
+        Cart cart = cartService.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found for user id: " + userId));
+
+        return ResponseEntity.ok(CartMapper.toResponseDTO(cart));
     }
 
     // ---------------- DELETE ----------------
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
+        // Service already handles ResourceNotFoundException
         cartService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

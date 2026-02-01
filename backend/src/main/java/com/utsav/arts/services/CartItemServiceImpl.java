@@ -1,5 +1,7 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.exceptions.InvalidRequestException;
+import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.models.Cart;
 import com.utsav.arts.models.CartItem;
 import com.utsav.arts.repository.CartItemRepository;
@@ -24,11 +26,11 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public CartItem save(CartItem cartItem) {
-
         validateQuantity(cartItem.getQuantity());
 
+        // Use InvalidRequestException for business logic violations (400 Bad Request)
         if (cartItem.getQuantity() == 0) {
-            throw new IllegalArgumentException("Quantity must be at least 1 when adding to cart");
+            throw new InvalidRequestException("Quantity must be at least 1 when adding to cart");
         }
 
         Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndArtworkId(
@@ -51,22 +53,20 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public CartItem update(CartItem cartItem) {
-
+        // Use ResourceNotFoundException for 404
         CartItem existingItem = cartItemRepository.findById(cartItem.getId())
-                .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with id: " + cartItem.getId()));
 
         int qty = cartItem.getQuantity();
         validateQuantity(qty);
 
-        // Quantity 0 → remove item
         if (qty == 0) {
             cartItemRepository.deleteById(existingItem.getId());
             cartService.save(existingItem.getCart());
-            return null; // controller can handle this cleanly
+            return null;
         }
 
         existingItem.setQuantity(qty);
-
         CartItem updatedItem = cartItemRepository.update(existingItem);
         cartService.save(existingItem.getCart());
 
@@ -91,37 +91,26 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public void deleteById(int id) {
         CartItem item = cartItemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot delete: Cart item not found with id: " + id));
 
         Cart cart = item.getCart();
-
         cartItemRepository.deleteById(id);
-
-        // Update cart totals automatically
         cartService.save(cart);
     }
 
     @Override
     public void deleteByCartId(int cartId) {
         Cart cart = cartService.findById(cartId)
-                .orElseThrow(() -> new IllegalArgumentException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cannot clear items: Cart not found with id: " + cartId));
 
         cartItemRepository.deleteByCartId(cartId);
-
-        // Update cart totals automatically
         cartService.save(cart);
-    }
-
-    public boolean isOwner(int cartItemId, int userId) {
-        return cartItemRepository.findById(cartItemId)
-                .map(item -> item.getCart().getUser().getId() == userId)
-                .orElse(false);
     }
 
     @Override
     public void decreaseQuantity(int cartItemId) {
         CartItem item = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with id: " + cartItemId));
 
         int newQty = item.getQuantity() - 1;
         validateQuantity(newQty);
@@ -139,7 +128,7 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     public void increaseQuantity(int cartItemId) {
         CartItem item = cartItemRepository.findById(cartItemId)
-                .orElseThrow(() -> new IllegalArgumentException("CartItem not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with id: " + cartItemId));
 
         int newQty = item.getQuantity() + 1;
         validateQuantity(newQty);
@@ -149,10 +138,16 @@ public class CartItemServiceImpl implements CartItemService {
 
         cartService.save(item.getCart());
     }
-    private void validateQuantity(int quantity) {
-        if (quantity < 0) {
-            throw new IllegalArgumentException("Quantity cannot be negative");
-        }
+
+    public boolean isOwner(int cartItemId, int userId) {
+        return cartItemRepository.findById(cartItemId)
+                .map(item -> item.getCart().getUser().getId() == userId)
+                .orElse(false);
     }
 
+    private void validateQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new InvalidRequestException("Quantity cannot be negative");
+        }
+    }
 }
