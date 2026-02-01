@@ -10,7 +10,15 @@ public interface PaymentService {
 
     Payment save(Payment payment);
 
-    Payment update(Payment payment);
+    //Payment update(Payment payment);
+
+    Payment markSuccess(int paymentId);
+
+    Payment markFailed(int paymentId);
+
+    Payment refund(int paymentId);
+
+    Payment cancel(int paymentId);
 
     Optional<Payment> findById(int id);
 

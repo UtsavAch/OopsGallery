@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -115,6 +116,42 @@ public class PaymentController {
         return ResponseEntity.ok(payments);
     }
 
+    // ---------------- UPDATE ----------------
+
+    @PostMapping("/{id}/success")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<PaymentResponseDTO> markSuccess(@PathVariable int id) {
+        return ResponseEntity.ok(
+                PaymentMapper.toResponseDTO(paymentService.markSuccess(id))
+        );
+    }
+
+
+    @PostMapping("/{id}/failed")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<PaymentResponseDTO> markFailed(@PathVariable int id) {
+        return ResponseEntity.ok(
+                PaymentMapper.toResponseDTO(paymentService.markFailed(id))
+        );
+    }
+
+    @PostMapping("/{id}/refund")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<PaymentResponseDTO> refund(@PathVariable int id) {
+        return ResponseEntity.ok(
+                PaymentMapper.toResponseDTO(paymentService.refund(id))
+        );
+    }
+
+    @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<PaymentResponseDTO> cancel(@PathVariable int id) {
+        return ResponseEntity.ok(
+                PaymentMapper.toResponseDTO(paymentService.cancel(id))
+        );
+    }
+
+
     // ---------------- DELETE ----------------
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
@@ -122,5 +159,13 @@ public class PaymentController {
         // Service now handles the ResourceNotFoundException
         paymentService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/payment-statuses")
+    @PreAuthorize("hasRole('OWNER')")
+    public List<String> getPaymentStatuses() {
+        return Arrays.stream(PaymentStatus.values())
+                .map(Enum::name)
+                .toList();
     }
 }

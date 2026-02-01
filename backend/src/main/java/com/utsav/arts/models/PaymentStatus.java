@@ -1,9 +1,17 @@
 package com.utsav.arts.models;
 
 public enum PaymentStatus {
-    PENDING, // Payment initiated, awaiting confirmation
-    SUCCESS, // Payment completed successfully
-    FAILED, // Payment failed
-    REFUNDED, // Payment refunded to the user
-    CANCELLED // Payment cancelled by user or system
+    PENDING,
+    SUCCESS,
+    FAILED,
+    REFUNDED,
+    CANCELLED;
+
+    public boolean canTransitionTo(PaymentStatus next) {
+        return switch (this) {
+            case PENDING -> next == SUCCESS || next == FAILED || next == CANCELLED;
+            case SUCCESS -> next == REFUNDED;
+            case FAILED, CANCELLED, REFUNDED -> false; // terminal
+        };
+    }
 }

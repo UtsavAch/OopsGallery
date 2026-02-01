@@ -10,7 +10,13 @@ public interface OrdersService {
 
     Orders placeOrder(int userId, String address);
 
-    Orders updateStatus(int orderId, OrderStatus status);
+    Orders confirmOrder(int orderId);
+
+    Orders shipOrder(int orderId);
+
+    Orders deliverOrder(int orderId);
+
+    Orders cancelOrder(int orderId);
 
     Optional<Orders> findById(int id);
 

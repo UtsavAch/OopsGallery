@@ -80,14 +80,57 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public Orders updateStatus(int orderId, OrderStatus status) {
-        // Use ResourceNotFoundException (404)
+    public Orders confirmOrder(int orderId) {
         Orders order = ordersRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + orderId));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
-        order.setStatus(status);
+        if (order.getStatus().canTransitionTo(OrderStatus.CONFIRMED)) {
+            throw new InvalidRequestException("Cannot confirm order from current status: " + order.getStatus());
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
         return ordersRepository.update(order);
     }
+
+    @Override
+    public Orders shipOrder(int orderId) {
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (order.getStatus().canTransitionTo(OrderStatus.SHIPPED)) {
+            throw new InvalidRequestException("Cannot ship order from current status: " + order.getStatus());
+        }
+
+        order.setStatus(OrderStatus.SHIPPED);
+        return ordersRepository.update(order);
+    }
+
+    @Override
+    public Orders deliverOrder(int orderId) {
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (order.getStatus().canTransitionTo(OrderStatus.DELIVERED)) {
+            throw new InvalidRequestException("Cannot deliver order from current status: " + order.getStatus());
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        return ordersRepository.update(order);
+    }
+
+    @Override
+    public Orders cancelOrder(int orderId) {
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        if (order.getStatus().canTransitionTo(OrderStatus.CANCELLED)) {
+            throw new InvalidRequestException("Cannot cancel order from current status: " + order.getStatus());
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
+        return ordersRepository.update(order);
+    }
+
 
     @Override
     public Optional<Orders> findById(int id) {

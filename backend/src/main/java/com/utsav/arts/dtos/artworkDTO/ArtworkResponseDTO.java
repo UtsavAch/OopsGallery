@@ -1,5 +1,7 @@
 package com.utsav.arts.dtos.artworkDTO;
 
+import com.utsav.arts.models.ArtCategory;
+
 import java.math.BigDecimal;
 
 public class ArtworkResponseDTO {
@@ -7,7 +9,7 @@ public class ArtworkResponseDTO {
     private int id;
     private String title;
     private String description;
-    private String category;
+    private ArtCategory category;
     private String label;
     private BigDecimal price;
     private String imgUrl;
@@ -23,8 +25,8 @@ public class ArtworkResponseDTO {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public ArtCategory getCategory() { return category; }
+    public void setCategory(ArtCategory category) { this.category = category; }
 
     public String getLabel() { return label; }
     public void setLabel(String label) { this.label = label; }

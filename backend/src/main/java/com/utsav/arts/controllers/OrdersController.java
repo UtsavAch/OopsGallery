@@ -99,14 +99,31 @@ public class OrdersController {
     }
 
     // ---------------- UPDATE ----------------
-    @PutMapping("/{id}/status")
+    @PostMapping("/{id}/confirm")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<OrdersResponseDTO> updateStatus(
-            @PathVariable int id,
-            @RequestParam OrderStatus status
-    ) {
-        // service handles 404 if orderId is invalid
-        Orders updated = ordersService.updateStatus(id, status);
+    public ResponseEntity<OrdersResponseDTO> confirmOrder(@PathVariable int id) {
+        Orders updated = ordersService.confirmOrder(id);
+        return ResponseEntity.ok(OrdersMapper.toDTO(updated));
+    }
+
+    @PostMapping("/{id}/ship")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<OrdersResponseDTO> shipOrder(@PathVariable int id) {
+        Orders updated = ordersService.shipOrder(id);
+        return ResponseEntity.ok(OrdersMapper.toDTO(updated));
+    }
+
+    @PostMapping("/{id}/deliver")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<OrdersResponseDTO> deliverOrder(@PathVariable int id) {
+        Orders updated = ordersService.deliverOrder(id);
+        return ResponseEntity.ok(OrdersMapper.toDTO(updated));
+    }
+
+    @PostMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('OWNER') or @ordersService.isOwner(#id, authentication.principal.id)")
+    public ResponseEntity<OrdersResponseDTO> cancelOrder(@PathVariable int id) {
+        Orders updated = ordersService.cancelOrder(id);
         return ResponseEntity.ok(OrdersMapper.toDTO(updated));
     }
 

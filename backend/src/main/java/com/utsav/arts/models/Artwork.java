@@ -17,7 +17,9 @@ public class Artwork {
 
     private String description;
 
-    private String category;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ArtCategory category;
 
     private String label;
 
@@ -28,7 +30,7 @@ public class Artwork {
     public Artwork() {}
 
     // Constructor for convenience
-    public Artwork(int id, String title, String description, String category, String label, BigDecimal price,String imgUrl) {
+    public Artwork(int id, String title, String description, ArtCategory category, String label, BigDecimal price,String imgUrl) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -48,8 +50,8 @@ public class Artwork {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public ArtCategory getCategory() { return category; }
+    public void setCategory(ArtCategory category) { this.category = category; }
 
     public String getLabel() { return label; }
     public void setLabel(String label) { this.label = label; }

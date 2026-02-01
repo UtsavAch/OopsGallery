@@ -20,6 +20,19 @@ CREATE TYPE payment_status_enum AS ENUM (
     'CANCELLED'
 );
 
+CREATE TYPE art_category_enum AS ENUM (
+    'PAINTING',
+    'DRAWING',
+    'DIGITAL_ART',
+    'PHOTOGRAPHY',
+    'SCULPTURE',
+    'PRINT',
+    'ILLUSTRATION',
+    'MIXED_MEDIA',
+    'CRAFT',
+    'OTHER'
+);
+
 CREATE TABLE users
 (
     id         SERIAL PRIMARY KEY,
@@ -35,9 +48,10 @@ CREATE TABLE users
 CREATE TABLE artworks
 (
     id          SERIAL PRIMARY KEY,
-    title       VARCHAR(255) NOT NULL,
+    title       VARCHAR(255)      NOT NULL,
     description TEXT,
     category    VARCHAR(100),
+    category    art_category_enum NOT NULL,
     label       VARCHAR(100),
     price       NUMERIC(10, 2),
     img_url     TEXT

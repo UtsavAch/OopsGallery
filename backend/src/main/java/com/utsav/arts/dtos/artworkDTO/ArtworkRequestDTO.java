@@ -1,5 +1,6 @@
 package com.utsav.arts.dtos.artworkDTO;
 
+import com.utsav.arts.models.ArtCategory;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
@@ -14,7 +15,7 @@ public class ArtworkRequestDTO {
     private String description;
 
     @NotBlank(message = "Category is required")
-    private String category;
+    private ArtCategory category;
 
     private String label; // Optional field, no NotBlank needed
 
@@ -36,8 +37,8 @@ public class ArtworkRequestDTO {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public ArtCategory getCategory() { return category; }
+    public void setCategory(ArtCategory category) { this.category = category; }
 
     public String getLabel() { return label; }
     public void setLabel(String label) { this.label = label; }

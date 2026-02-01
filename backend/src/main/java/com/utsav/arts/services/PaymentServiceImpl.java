@@ -1,5 +1,6 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.exceptions.InvalidRequestException;
 import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.models.Payment;
 import com.utsav.arts.models.PaymentStatus;
@@ -34,14 +35,37 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentRepository.save(payment);
     }
 
-    @Override
-    public Payment update(Payment payment) {
-        // Use ResourceNotFoundException for proper 404 response
-        paymentRepository.findById(payment.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + payment.getId()));
+    public Payment markSuccess(int paymentId) {
+        return updateStatusInternal(paymentId, PaymentStatus.SUCCESS);
+    }
 
+    public Payment markFailed(int paymentId) {
+        return updateStatusInternal(paymentId, PaymentStatus.FAILED);
+    }
+
+    public Payment refund(int paymentId) {
+        return updateStatusInternal(paymentId, PaymentStatus.REFUNDED);
+    }
+
+    public Payment cancel(int paymentId) {
+        return updateStatusInternal(paymentId, PaymentStatus.CANCELLED);
+    }
+
+    private Payment updateStatusInternal(int id, PaymentStatus next) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
+
+        if (!payment.getStatus().canTransitionTo(next)) {
+            throw new InvalidRequestException(
+                    "Invalid payment status transition: " +
+                            payment.getStatus() + " → " + next
+            );
+        }
+
+        payment.setStatus(next);
         return paymentRepository.update(payment);
     }
+
 
     @Override
     public Optional<Payment> findById(int id) {
