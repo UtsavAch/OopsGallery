@@ -27,6 +27,7 @@ public class UserController {
     }
 
     // ---------------- CREATE ----------------
+    // Public: Anyone can register
     @PostMapping
     public ResponseEntity<UserResponseDTO> save(@Valid @RequestBody UserRequestDTO requestDTO) {
         User user = UserMapper.toEntity(requestDTO);
@@ -47,38 +48,39 @@ public class UserController {
     ) {
         User user = UserMapper.toEntity(requestDTO);
         user.setId(id);
-
         User updatedUser = userService.update(user);
         return ResponseEntity.ok(UserMapper.toResponseDTO(updatedUser));
     }
 
     // ---------------- READ ----------------
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> findById(@PathVariable int id) {
-        // Proper: Throwing exception triggers GlobalExceptionHandler's JSON response
-        User user = userService.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        return ResponseEntity.ok(UserMapper.toResponseDTO(user));
-    }
-
-    @GetMapping("/email/{email}")
-    public ResponseEntity<UserResponseDTO> findByEmail(@PathVariable String email) {
-        // Proper: Throwing exception triggers GlobalExceptionHandler's JSON response
-        User user = userService.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
-
-        return ResponseEntity.ok(UserMapper.toResponseDTO(user));
-    }
-
+    // Only the Owner can see the full list of users
     @GetMapping
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<UserResponseDTO>> findAll() {
         List<UserResponseDTO> users = userService.findAll()
                 .stream()
                 .map(UserMapper::toResponseDTO)
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(users);
+    }
+
+    // Owner can see anyone; User can only see themselves
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER') or #id == authentication.principal.id")
+    public ResponseEntity<UserResponseDTO> findById(@PathVariable int id) {
+        User user = userService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        return ResponseEntity.ok(UserMapper.toResponseDTO(user));
+    }
+
+    // Owner can search anyone; User can only search their own email
+    @GetMapping("/email/{email}")
+    @PreAuthorize("hasRole('OWNER') or #email == authentication.principal.username")
+    public ResponseEntity<UserResponseDTO> findByEmail(@PathVariable String email) {
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        return ResponseEntity.ok(UserMapper.toResponseDTO(user));
     }
 
     // ---------------- DELETE ----------------
@@ -90,6 +92,7 @@ public class UserController {
     }
 
     // ---------------- UTILITY ----------------
+    // Public: Often needed during registration to check if email is taken
     @GetMapping("/exists/{email}")
     public ResponseEntity<Boolean> existsByEmail(@PathVariable String email) {
         return ResponseEntity.ok(userService.existsByEmail(email));
