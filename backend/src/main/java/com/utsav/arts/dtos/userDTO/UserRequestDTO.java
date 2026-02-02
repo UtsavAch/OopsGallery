@@ -30,8 +30,6 @@ public class UserRequestDTO {
     @NotBlank(message = "Address is required")
     private String address;
 
-    private Role role; // Usually handled by logic, but can be validated if necessary
-
     public UserRequestDTO() {}
 
     // Getters & Setters remain the same
@@ -52,7 +50,4 @@ public class UserRequestDTO {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
-
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
 }

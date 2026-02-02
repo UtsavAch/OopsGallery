@@ -1,38 +1,3 @@
-CREATE TYPE role_enum AS ENUM (
-    'ROLE_OWNER',
-    'ROLE_USER',
-    'ROLE_GUEST'
-);
-
-CREATE TYPE order_status_enum AS ENUM (
-    'PENDING',
-    'CONFIRMED',
-    'SHIPPED',
-    'DELIVERED',
-    'CANCELLED'
-);
-
-CREATE TYPE payment_status_enum AS ENUM (
-    'PENDING',
-    'SUCCESS',
-    'FAILED',
-    'REFUNDED',
-    'CANCELLED'
-);
-
-CREATE TYPE art_category_enum AS ENUM (
-    'PAINTING',
-    'DRAWING',
-    'DIGITAL_ART',
-    'PHOTOGRAPHY',
-    'SCULPTURE',
-    'PRINT',
-    'ILLUSTRATION',
-    'MIXED_MEDIA',
-    'CRAFT',
-    'OTHER'
-);
-
 CREATE TABLE users
 (
     id         SERIAL PRIMARY KEY,
@@ -42,16 +7,15 @@ CREATE TABLE users
     phone_no   VARCHAR(30),
     password   TEXT         NOT NULL,
     address    TEXT,
-    role       role_enum    NOT NULL
+    role       VARCHAR(50)  NOT NULL   -- ROLE_OWNER, ROLE_USER, ROLE_GUEST
 );
 
 CREATE TABLE artworks
 (
     id          SERIAL PRIMARY KEY,
-    title       VARCHAR(255)      NOT NULL,
+    title       VARCHAR(255) NOT NULL,
     description TEXT,
-    category    VARCHAR(100),
-    category    art_category_enum NOT NULL,
+    category    VARCHAR(100) NOT NULL,  -- PAINTING, DIGITAL_ART, etc.
     label       VARCHAR(100),
     price       NUMERIC(10, 2),
     img_url     TEXT
@@ -69,7 +33,7 @@ CREATE TABLE cart
             ON DELETE CASCADE
 );
 
-CREATE TABLE cart_item
+CREATE TABLE cart_items
 (
     id         SERIAL PRIMARY KEY,
     cart_id    INT NOT NULL,
@@ -92,7 +56,7 @@ CREATE TABLE orders
     user_id     INT               NOT NULL,
     total_price NUMERIC(10, 2),
     address     TEXT,
-    status      order_status_enum NOT NULL,
+    status      VARCHAR(50)       NOT NULL,  -- PENDING, CONFIRMED, etc.
     ordered_at  TIMESTAMP,
     CONSTRAINT fk_orders_user
         FOREIGN KEY (user_id)
@@ -124,7 +88,7 @@ CREATE TABLE payments
     amount         NUMERIC(10, 2) NOT NULL,
     currency       VARCHAR(10),
     method         VARCHAR(50),
-    status         payment_status_enum,
+    status         VARCHAR(50),  -- PENDING, SUCCESS, FAILED, etc.
     transaction_id VARCHAR(255),
     created_at     TIMESTAMP,
     CONSTRAINT fk_payment_order
@@ -138,4 +102,4 @@ CREATE TABLE payments
 CREATE INDEX idx_artworks_category ON artworks(category);
 CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_payments_order_id ON payments(order_id);
-CREATE INDEX idx_cart_item_cart_id ON cart_item(cart_id);
+CREATE INDEX idx_cart_items_cart_id ON cart_items(cart_id);

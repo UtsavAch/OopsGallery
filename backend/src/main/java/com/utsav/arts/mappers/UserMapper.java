@@ -15,8 +15,6 @@ public class UserMapper {
         user.setPhoneNo(dto.getPhoneNo());
         user.setPassword(dto.getPassword());
         user.setAddress(dto.getAddress());
-        // If the DTO role is null, default to ROLE_USER to avoid null pointers
-        user.setRole(dto.getRole() != null ? dto.getRole() : Role.ROLE_USER);
         return user;
     }
 

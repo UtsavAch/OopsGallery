@@ -31,7 +31,6 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserResponseDTO> save(@Valid @RequestBody UserRequestDTO requestDTO) {
         User user = UserMapper.toEntity(requestDTO);
-        user.setRole(Role.ROLE_USER);
         User savedUser = userService.save(user);
         return new ResponseEntity<>(
                 UserMapper.toResponseDTO(savedUser),
@@ -50,6 +49,16 @@ public class UserController {
         user.setId(id);
         User updatedUser = userService.update(user);
         return ResponseEntity.ok(UserMapper.toResponseDTO(updatedUser));
+    }
+
+    @PatchMapping("/{id}/role")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<UserResponseDTO> updateRole(
+            @PathVariable int id,
+            @RequestParam Role role
+    ) {
+        User updated = userService.updateRole(id, role);
+        return ResponseEntity.ok(UserMapper.toResponseDTO(updated));
     }
 
     // ---------------- READ ----------------

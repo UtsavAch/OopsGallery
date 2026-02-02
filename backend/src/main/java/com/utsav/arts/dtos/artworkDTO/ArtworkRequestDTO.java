@@ -14,10 +14,10 @@ public class ArtworkRequestDTO {
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
 
-    @NotBlank(message = "Category is required")
+    @NotNull(message = "Category is required")
     private ArtCategory category;
 
-    private String label; // Optional field, no NotBlank needed
+    private String label; // Optional field
 
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")

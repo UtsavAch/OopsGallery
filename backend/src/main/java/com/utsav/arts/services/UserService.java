@@ -1,5 +1,6 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.models.Role;
 import com.utsav.arts.models.User;
 
 import java.util.List;
@@ -10,6 +11,8 @@ public interface UserService {
     User save(User user);
 
     User update(User user);
+
+    User updateRole(int userId, Role role);
 
     Optional<User> findById(int id);
 
