@@ -13,7 +13,6 @@ public class ArtworkMapper {
         artwork.setCategory(dto.getCategory());
         artwork.setLabel(dto.getLabel());
         artwork.setPrice(dto.getPrice());
-        artwork.setImgUrl(dto.getImgUrl());
         return artwork;
     }
 

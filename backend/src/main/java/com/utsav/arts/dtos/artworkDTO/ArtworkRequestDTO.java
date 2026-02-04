@@ -23,11 +23,6 @@ public class ArtworkRequestDTO {
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than zero")
     private BigDecimal price;
 
-    @NotBlank(message = "Image URL is required")
-    @Pattern(regexp = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]",
-            message = "Please provide a valid URL for the image")
-    private String imgUrl;
-
     public ArtworkRequestDTO() {}
 
     // Getters & Setters
@@ -45,7 +40,4 @@ public class ArtworkRequestDTO {
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
-
-    public String getImgUrl() { return imgUrl; }
-    public void setImgUrl(String imgUrl) { this.imgUrl = imgUrl; }
 }
