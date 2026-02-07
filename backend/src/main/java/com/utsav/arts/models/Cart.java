@@ -2,6 +2,7 @@ package com.utsav.arts.models;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,7 +17,7 @@ public class Cart {
     private User user;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> items;
+    private List<CartItem> items = new ArrayList<>();
 
     private int totalItems;
 
@@ -26,6 +27,9 @@ public class Cart {
 
     public Cart(User user) {
         this.user = user;
+        this.items = new ArrayList<>();
+        this.totalItems = 0;
+        this.totalPrice = BigDecimal.ZERO;
     }
 
     // ---------------- Getters & Setters ----------------

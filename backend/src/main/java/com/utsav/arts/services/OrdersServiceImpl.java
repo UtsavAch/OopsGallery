@@ -21,16 +21,13 @@ public class OrdersServiceImpl implements OrdersService {
     private final OrdersRepository ordersRepository;
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
-    private final CartItemService cartItemService;
 
     public OrdersServiceImpl(OrdersRepository ordersRepository,
                              CartRepository cartRepository,
-                             UserRepository userRepository,
-                             CartItemService cartItemService) {
+                             UserRepository userRepository) {
         this.ordersRepository = ordersRepository;
         this.cartRepository = cartRepository;
         this.userRepository = userRepository;
-        this.cartItemService = cartItemService;
     }
 
     @Override

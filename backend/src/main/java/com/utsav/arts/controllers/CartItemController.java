@@ -40,7 +40,6 @@ public class CartItemController {
     @PostMapping
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#requestDTO.cartId, authentication.principal.id)")
     public ResponseEntity<CartItemResponseDTO> save(@Valid @RequestBody CartItemRequestDTO requestDTO) {
-        // Use ResourceNotFoundException for 404 instead of generic IllegalArgumentException
         Cart cart = cartService.findById(requestDTO.getCartId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found with id: " + requestDTO.getCartId()));
 
@@ -48,7 +47,7 @@ public class CartItemController {
                 .orElseThrow(() -> new ResourceNotFoundException("Artwork not found with id: " + requestDTO.getArtworkId()));
 
         CartItem cartItem = CartItemMapper.toEntity(requestDTO, cart, artwork);
-        CartItem savedItem = cartItemService.save(cartItem);
+        CartItem savedItem = cartItemService.save(cartItem, cart); // pass cart
 
         return new ResponseEntity<>(CartItemMapper.toResponseDTO(savedItem), HttpStatus.CREATED);
     }
@@ -66,7 +65,11 @@ public class CartItemController {
         CartItem cartItem = CartItemMapper.toEntity(requestDTO, cart, artwork);
         cartItem.setId(id);
 
-        CartItem updatedItem = cartItemService.update(cartItem);
+        CartItem updatedItem = cartItemService.update(cartItem, cart); // pass cart
+
+        if (updatedItem == null) {
+            return ResponseEntity.noContent().build();
+        }
 
         return ResponseEntity.ok(CartItemMapper.toResponseDTO(updatedItem));
     }

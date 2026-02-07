@@ -25,35 +25,31 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public CartItem save(CartItem cartItem) {
+    public CartItem save(CartItem cartItem, Cart cart) {
         validateQuantity(cartItem.getQuantity());
 
-        // Use InvalidRequestException for business logic violations (400 Bad Request)
         if (cartItem.getQuantity() == 0) {
             throw new InvalidRequestException("Quantity must be at least 1 when adding to cart");
         }
 
-        Optional<CartItem> existingItem = cartItemRepository.findByCartIdAndArtworkId(
-                cartItem.getCart().getId(),
-                cartItem.getArtwork().getId()
-        );
+        CartItem result = cartItemRepository
+                .findByCartIdAndArtworkId(cart.getId(), cartItem.getArtwork().getId())
+                .map(existingItem -> {
+                    existingItem.setQuantity(existingItem.getQuantity() + cartItem.getQuantity());
+                    return cartItemRepository.update(existingItem);
+                })
+                .orElseGet(() -> {
+                    cartItem.setCart(cart);
+                    cart.getItems().add(cartItem); // keep cart.items in sync
+                    return cartItemRepository.save(cartItem);
+                });
 
-        CartItem result;
-        if (existingItem.isPresent()) {
-            CartItem item = existingItem.get();
-            item.setQuantity(item.getQuantity() + cartItem.getQuantity());
-            result = cartItemRepository.update(item);
-        } else {
-            result = cartItemRepository.save(cartItem);
-        }
-
-        cartService.save(cartItem.getCart());
+        recalculateCart(cart);
         return result;
     }
 
     @Override
-    public CartItem update(CartItem cartItem) {
-        // Use ResourceNotFoundException for 404
+    public CartItem update(CartItem cartItem, Cart cart) {
         CartItem existingItem = cartItemRepository.findById(cartItem.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with id: " + cartItem.getId()));
 
@@ -61,15 +57,15 @@ public class CartItemServiceImpl implements CartItemService {
         validateQuantity(qty);
 
         if (qty == 0) {
+            cart.getItems().remove(existingItem); // keep cart.items in sync
             cartItemRepository.deleteById(existingItem.getId());
-            cartService.save(existingItem.getCart());
+            recalculateCart(cart);
             return null;
         }
 
         existingItem.setQuantity(qty);
         CartItem updatedItem = cartItemRepository.update(existingItem);
-        cartService.save(existingItem.getCart());
-
+        recalculateCart(cart);
         return updatedItem;
     }
 
@@ -94,8 +90,10 @@ public class CartItemServiceImpl implements CartItemService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cannot delete: Cart item not found with id: " + id));
 
         Cart cart = item.getCart();
+        cart.getItems().remove(item); // sync list
         cartItemRepository.deleteById(id);
-        cartService.save(cart);
+
+        recalculateCart(cart);
     }
 
     @Override
@@ -103,8 +101,9 @@ public class CartItemServiceImpl implements CartItemService {
         Cart cart = cartService.findById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cannot clear items: Cart not found with id: " + cartId));
 
+        cart.getItems().clear(); // clear items in memory
         cartItemRepository.deleteByCartId(cartId);
-        cartService.save(cart);
+        recalculateCart(cart);
     }
 
     @Override
@@ -112,17 +111,18 @@ public class CartItemServiceImpl implements CartItemService {
         CartItem item = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with id: " + cartItemId));
 
+        Cart cart = item.getCart();
         int newQty = item.getQuantity() - 1;
-        validateQuantity(newQty);
 
-        if (newQty == 0) {
+        if (newQty <= 0) {
+            cart.getItems().remove(item);
             cartItemRepository.deleteById(cartItemId);
         } else {
             item.setQuantity(newQty);
             cartItemRepository.update(item);
         }
 
-        cartService.save(item.getCart());
+        recalculateCart(cart);
     }
 
     @Override
@@ -130,13 +130,11 @@ public class CartItemServiceImpl implements CartItemService {
         CartItem item = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with id: " + cartItemId));
 
-        int newQty = item.getQuantity() + 1;
-        validateQuantity(newQty);
-
-        item.setQuantity(newQty);
+        Cart cart = item.getCart();
+        item.setQuantity(item.getQuantity() + 1);
         cartItemRepository.update(item);
 
-        cartService.save(item.getCart());
+        recalculateCart(cart);
     }
 
     public boolean isOwner(int cartItemId, int userId) {
@@ -145,9 +143,16 @@ public class CartItemServiceImpl implements CartItemService {
                 .orElse(false);
     }
 
+    // HELPER METHODS
+
     private void validateQuantity(int quantity) {
         if (quantity < 0) {
             throw new InvalidRequestException("Quantity cannot be negative");
         }
+    }
+
+    private void recalculateCart(Cart cart) {
+        cart.recalculateTotals();
+        cartService.save(cart);
     }
 }

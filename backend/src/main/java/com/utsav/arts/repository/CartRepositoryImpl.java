@@ -28,23 +28,47 @@ public class CartRepositoryImpl implements CartRepository {
 
     @Override
     public Optional<Cart> findById(int id) {
-        return Optional.ofNullable(entityManager.find(Cart.class, id));
-    }
-
-    @Override
-    public Optional<Cart> findByUserId(int userId) {
         try {
             Cart cart = entityManager.createQuery(
-                            "SELECT c FROM Cart c WHERE c.user.id = :userId",
+                            """
+                            SELECT DISTINCT c
+                            FROM Cart c
+                            LEFT JOIN FETCH c.items i
+                            LEFT JOIN FETCH i.artwork
+                            WHERE c.id = :id
+                            """,
                             Cart.class
                     )
-                    .setParameter("userId", userId)
+                    .setParameter("id", id)
                     .getSingleResult();
+
             return Optional.of(cart);
         } catch (NoResultException e) {
             return Optional.empty();
         }
     }
+
+@Override
+public Optional<Cart> findByUserId(int userId) {
+    try {
+        Cart cart = entityManager.createQuery(
+                        """
+                        SELECT DISTINCT c
+                        FROM Cart c
+                        LEFT JOIN FETCH c.items i
+                        LEFT JOIN FETCH i.artwork
+                        WHERE c.user.id = :userId
+                        """,
+                        Cart.class
+                )
+                .setParameter("userId", userId)
+                .getSingleResult();
+
+        return Optional.of(cart);
+    } catch (NoResultException e) {
+        return Optional.empty();
+    }
+}
 
     @Override
     public void deleteById(int id) {

@@ -1,5 +1,6 @@
 package com.utsav.arts.services;
 
+import com.utsav.arts.models.Cart;
 import com.utsav.arts.models.CartItem;
 
 import java.util.List;
@@ -7,9 +8,9 @@ import java.util.Optional;
 
 public interface CartItemService {
 
-    CartItem save(CartItem cartItem);
+    CartItem save(CartItem cartItem, Cart cart);
 
-    CartItem update(CartItem cartItem);
+    CartItem update(CartItem cartItem, Cart cart);
 
     Optional<CartItem> findById(int id);
 
