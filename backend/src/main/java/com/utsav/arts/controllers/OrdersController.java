@@ -99,6 +99,7 @@ public class OrdersController {
     }
 
     // ---------------- UPDATE ----------------
+    // OWNER ONLY, emergency/manual override
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<OrdersResponseDTO> confirmOrder(@PathVariable int id) {

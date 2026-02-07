@@ -1,6 +1,5 @@
 package com.utsav.arts.services;
 
-import com.utsav.arts.models.Orders;
 import com.utsav.arts.models.Payment;
 import com.utsav.arts.models.PaymentStatus;
 
@@ -10,16 +9,6 @@ import java.util.Optional;
 public interface PaymentService {
 
     Payment save(Payment payment);
-
-    //Payment update(Payment payment);
-
-    Payment markSuccess(int paymentId);
-
-    Payment markFailed(int paymentId);
-
-    Payment refund(int paymentId);
-
-    Payment cancel(int paymentId);
 
     Optional<Payment> findById(int id);
 

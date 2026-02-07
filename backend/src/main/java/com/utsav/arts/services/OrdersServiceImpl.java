@@ -35,16 +35,12 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public Orders placeOrder(int userId, String address) {
-
-        // 1. Fetch User - Use ResourceNotFoundException (404)
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        // 2. Fetch Cart - Use ResourceNotFoundException (404)
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("No active cart found for user id: " + userId));
 
-        // 3. Validate Cart Content - Use InvalidRequestException (400)
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             throw new InvalidRequestException("Cannot place order: Your cart is empty.");
         }
@@ -55,28 +51,23 @@ public class OrdersServiceImpl implements OrdersService {
         order.setStatus(OrderStatus.PENDING);
         order.setOrderedAt(LocalDateTime.now());
 
-        int total = 0;
+        BigDecimal total = BigDecimal.ZERO;
 
         for (CartItem cartItem : cart.getItems()) {
             OrderItem orderItem = new OrderItem();
             orderItem.setArtwork(cartItem.getArtwork());
             orderItem.setQuantity(cartItem.getQuantity());
-
-            BigDecimal price = cartItem.getArtwork().getPrice();
-            orderItem.setPriceAtPurchase(price);
-
+            orderItem.setPriceAtPurchase(cartItem.getArtwork().getPrice());
             order.addOrderItem(orderItem);
-            total += price.multiply(BigDecimal.valueOf(cartItem.getQuantity())).intValue();
+
+            total = total.add(cartItem.getArtwork().getPrice()
+                    .multiply(BigDecimal.valueOf(cartItem.getQuantity())));
         }
 
-        order.setTotalPrice(BigDecimal.valueOf(total));
+        order.setTotalPrice(total);
 
-        Orders saved = ordersRepository.save(order);
-
-        // Clear the cart after successful order placement
-        cartItemService.deleteByCartId(cart.getId());
-
-        return saved;
+        // Save order first
+        return ordersRepository.save(order);
     }
 
     @Override
@@ -85,7 +76,9 @@ public class OrdersServiceImpl implements OrdersService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         if (order.getStatus().canTransitionTo(OrderStatus.CONFIRMED)) {
-            throw new InvalidRequestException("Cannot confirm order from current status: " + order.getStatus());
+            throw new InvalidRequestException(
+                    "Cannot confirm order from current status: " + order.getStatus()
+            );
         }
 
         order.setStatus(OrderStatus.CONFIRMED);

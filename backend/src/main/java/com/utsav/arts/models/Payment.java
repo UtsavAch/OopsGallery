@@ -21,9 +21,10 @@ public class Payment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private BigDecimal amount;
 
+    @Column(nullable = false, updatable = false)
     private String currency;   // "EUR", "USD", etc.
 
     private String method;     // "CARD", "UPI", "PAYPAL"
@@ -31,6 +32,7 @@ public class Payment {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status; // PENDING, SUCCESS, FAILED, REFUNDED
 
+    @Column(nullable = false, updatable = false, unique = true)
     private String transactionId; // from payment gateway
 
     @Column(name = "created_at")

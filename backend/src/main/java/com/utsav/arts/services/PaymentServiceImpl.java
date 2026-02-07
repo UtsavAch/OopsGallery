@@ -1,6 +1,5 @@
 package com.utsav.arts.services;
 
-import com.utsav.arts.exceptions.InvalidRequestException;
 import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.models.Orders; // Import Orders
 import com.utsav.arts.models.OrderStatus; // Import OrderStatus
@@ -20,10 +19,15 @@ import java.util.Optional;
 public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final OrdersRepository ordersRepository; // Inject OrdersRepository
+    private final OrdersRepository ordersRepository;
+    private final CartService cartService;
+    private final CartItemService cartItemService;
+
 
     // Update Constructor
-    public PaymentServiceImpl(PaymentRepository paymentRepository, OrdersRepository ordersRepository) {
+    public PaymentServiceImpl(PaymentRepository paymentRepository, OrdersRepository ordersRepository, CartService cartService, CartItemService cartItemService) {
+        this.cartService = cartService;
+        this.cartItemService = cartItemService;
         this.paymentRepository = paymentRepository;
         this.ordersRepository = ordersRepository;
     }
@@ -43,34 +47,6 @@ public class PaymentServiceImpl implements PaymentService {
             confirmOrderInternal(saved.getOrder());
         }
         return saved;
-    }
-
-    // When Payment is Success -> Order is Confirmed
-    public Payment markSuccess(int paymentId) {
-        Payment payment = updateStatusInternal(paymentId, PaymentStatus.SUCCESS);
-
-        // Automatically confirm the order
-        confirmOrderInternal(payment.getOrder());
-
-        return payment;
-    }
-
-    // When Payment is Refunded -> Order is Canceled (Optional, depends on policy)
-    public Payment refund(int paymentId) {
-        Payment payment = updateStatusInternal(paymentId, PaymentStatus.REFUNDED);
-
-        // Specific logic to cancel order if refunded
-        cancelOrderInternal(payment.getOrder());
-
-        return payment;
-    }
-
-    public Payment markFailed(int paymentId) {
-        return updateStatusInternal(paymentId, PaymentStatus.FAILED);
-    }
-
-    public Payment cancel(int paymentId) {
-        return updateStatusInternal(paymentId, PaymentStatus.CANCELLED);
     }
 
     @Override
@@ -119,39 +95,16 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
 
-    // --- Helper Methods to update Orders via Repository (Prevents Circular Dependency) ---
     private void confirmOrderInternal(Orders order) {
-        // Only confirm if it's currently PENDING.
-        // If it's already SHIPPED or DELIVERED, we don't want to mess it up.
-        if (order.getStatus() == OrderStatus.PENDING) {
-            order.setStatus(OrderStatus.CONFIRMED);
-            ordersRepository.save(order); // Save the order status change
-        }
+        if (order.getStatus() != OrderStatus.PENDING) return;
+
+        // Confirm the order
+        order.setStatus(OrderStatus.CONFIRMED);
+        ordersRepository.save(order);
+
+        // Clear the user's cart after successful payment
+        cartService.findByUserId(order.getUser().getId())
+                .ifPresent(cart -> cartItemService.deleteByCartId(cart.getId()));
     }
 
-    private Payment updateStatusInternal(int id, PaymentStatus next) {
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-
-        if (!payment.getStatus().canTransitionTo(next)) {
-            throw new InvalidRequestException(
-                    "Invalid payment status transition: " +
-                            payment.getStatus() + " -> " + next
-            );
-        }
-
-        payment.setStatus(next);
-        return paymentRepository.update(payment);
-    }
-
-    private void cancelOrderInternal(Orders order) {
-        // Allow cancellation if it hasn't been shipped yet
-        if (order.getStatus() != OrderStatus.SHIPPED &&
-                order.getStatus() != OrderStatus.DELIVERED &&
-                order.getStatus() != OrderStatus.CANCELLED) {
-
-            order.setStatus(OrderStatus.CANCELLED);
-            ordersRepository.update(order);
-        }
-    }
 }

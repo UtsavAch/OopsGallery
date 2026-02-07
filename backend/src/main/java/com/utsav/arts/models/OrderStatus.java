@@ -9,7 +9,7 @@ public enum OrderStatus {
 
     // Helper: define allowed next statuses
     public boolean canTransitionTo(OrderStatus next) {
-        return !switch (this) {
+        return switch (this) {
             case PENDING -> next == CONFIRMED || next == CANCELLED;
             case CONFIRMED -> next == SHIPPED;
             case SHIPPED -> next == DELIVERED;

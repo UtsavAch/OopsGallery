@@ -1,6 +1,7 @@
 package com.utsav.arts.controllers;
 
-import com.utsav.arts.dtos.paymentDTO.PaymentRequestDTO;
+import com.utsav.arts.configurations.UserPrincipal;
+import com.utsav.arts.stripepayment.CreatePaymentIntentDTO;
 import com.utsav.arts.dtos.paymentDTO.PaymentResponseDTO;
 import com.utsav.arts.exceptions.InvalidRequestException;
 import com.utsav.arts.exceptions.ResourceNotFoundException;
@@ -8,7 +9,7 @@ import com.utsav.arts.mappers.PaymentMapper;
 import com.utsav.arts.models.Orders;
 import com.utsav.arts.models.Payment;
 import com.utsav.arts.models.PaymentStatus;
-import com.utsav.arts.models.User;
+import com.utsav.arts.stripepayment.StripeService;
 import com.utsav.arts.services.OrdersService;
 import com.utsav.arts.services.PaymentService;
 import com.utsav.arts.services.UserService;
@@ -16,11 +17,14 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -30,28 +34,13 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final UserService userService;
     private final OrdersService ordersService;
+    private final StripeService stripeService;
 
-    public PaymentController(PaymentService paymentService, UserService userService, OrdersService ordersService) {
+    public PaymentController(PaymentService paymentService, UserService userService, OrdersService ordersService, StripeService stripeService) {
         this.paymentService = paymentService;
         this.userService = userService;
         this.ordersService = ordersService;
-    }
-
-    // ---------------- CREATE ----------------
-    @PostMapping
-    @PreAuthorize("hasRole('OWNER') or #requestDTO.userId == authentication.principal.id")
-    public ResponseEntity<PaymentResponseDTO> save(@Valid @RequestBody PaymentRequestDTO requestDTO) {
-        // Use ResourceNotFoundException for consistent 404 messaging
-        User user = userService.findById(requestDTO.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Payment failed: User not found with id: " + requestDTO.getUserId()));
-
-        Orders order = ordersService.findById(requestDTO.getOrderId())
-                .orElseThrow(() -> new ResourceNotFoundException("Payment failed: Order not found with id: " + requestDTO.getOrderId()));
-
-        Payment payment = PaymentMapper.toEntity(requestDTO, order, user);
-        Payment savedPayment = paymentService.save(payment);
-
-        return new ResponseEntity<>(PaymentMapper.toResponseDTO(savedPayment), HttpStatus.CREATED);
+        this.stripeService = stripeService;
     }
 
     // ---------------- READ ----------------
@@ -117,38 +106,35 @@ public class PaymentController {
     }
 
     // ---------------- UPDATE ----------------
+    @PostMapping("/intent")
+    @PreAuthorize("hasRole('OWNER') or hasRole('USER')")
+    public ResponseEntity<Map<String, String>> createPaymentIntent(
+            @Valid @RequestBody CreatePaymentIntentDTO requestDTO,
+            Authentication authentication
+    ) throws Exception {
 
-    @PostMapping("/{id}/success")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<PaymentResponseDTO> markSuccess(@PathVariable int id) {
-        return ResponseEntity.ok(
-                PaymentMapper.toResponseDTO(paymentService.markSuccess(id))
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        assert principal != null;
+        int userId = principal.getId();
+
+        // Verify order ownership
+        if (!ordersService.isOwner(requestDTO.getOrderId(), userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        // Fetch order (server-side truth)
+        Orders order = ordersService.findById(requestDTO.getOrderId())
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+
+        // Create Stripe PaymentIntent
+        String clientSecret = stripeService.createPaymentIntent(
+                order.getTotalPrice(),
+                requestDTO.getCurrency(),
+                order.getId(),
+                userId
         );
-    }
 
-
-    @PostMapping("/{id}/failed")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<PaymentResponseDTO> markFailed(@PathVariable int id) {
-        return ResponseEntity.ok(
-                PaymentMapper.toResponseDTO(paymentService.markFailed(id))
-        );
-    }
-
-    @PostMapping("/{id}/refund")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<PaymentResponseDTO> refund(@PathVariable int id) {
-        return ResponseEntity.ok(
-                PaymentMapper.toResponseDTO(paymentService.refund(id))
-        );
-    }
-
-    @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<PaymentResponseDTO> cancel(@PathVariable int id) {
-        return ResponseEntity.ok(
-                PaymentMapper.toResponseDTO(paymentService.cancel(id))
-        );
+        return ResponseEntity.ok(Map.of("clientSecret", clientSecret));
     }
 
 
