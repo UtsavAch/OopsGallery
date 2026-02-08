@@ -105,7 +105,7 @@ public class PaymentController {
         return ResponseEntity.ok(payments);
     }
 
-    // ---------------- UPDATE ----------------
+    // ---------------- CREATE PAYMENT INTENT ----------------
     @PostMapping("/intent")
     @PreAuthorize("hasRole('OWNER') or hasRole('USER')")
     public ResponseEntity<Map<String, String>> createPaymentIntent(

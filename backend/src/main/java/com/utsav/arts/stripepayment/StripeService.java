@@ -44,6 +44,7 @@ public class StripeService {
                                 PaymentIntentCreateParams.AutomaticPaymentMethods
                                         .builder()
                                         .setEnabled(true)
+                                        .setAllowRedirects(PaymentIntentCreateParams.AutomaticPaymentMethods.AllowRedirects.NEVER)
                                         .build()
                         )
                         .putMetadata("order_id", String.valueOf(orderId))

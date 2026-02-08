@@ -19,9 +19,7 @@ public class OrdersRepositoryImpl implements OrdersRepository {
 
     @Override
     public Orders save(Orders order) {
-        // Because of CascadeType.ALL, this saves the Order AND all its OrderItems automatically.
-        entityManager.persist(order);
-        return order;
+        return entityManager.merge(order);
     }
 
     @Override
@@ -31,13 +29,22 @@ public class OrdersRepositoryImpl implements OrdersRepository {
 
     @Override
     public Optional<Orders> findById(int id) {
-        return Optional.ofNullable(entityManager.find(Orders.class, id));
+        try {
+            Orders order = entityManager.createQuery(
+                            "SELECT o FROM Orders o LEFT JOIN FETCH o.orderItems WHERE o.id = :id",
+                            Orders.class
+                    ).setParameter("id", id)
+                    .getSingleResult();
+            return Optional.of(order);
+        } catch (jakarta.persistence.NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<Orders> findAll() {
         return entityManager.createQuery(
-                "SELECT o FROM Orders o ORDER BY o.orderedAt DESC",
+                "SELECT DISTINCT o FROM Orders o LEFT JOIN FETCH o.orderItems ORDER BY o.orderedAt DESC",
                 Orders.class
         ).getResultList();
     }
@@ -45,10 +52,9 @@ public class OrdersRepositoryImpl implements OrdersRepository {
     @Override
     public List<Orders> findByUserId(int userId) {
         return entityManager.createQuery(
-                        "SELECT o FROM Orders o WHERE o.user.id = :userId ORDER BY o.orderedAt DESC",
+                        "SELECT DISTINCT o FROM Orders o LEFT JOIN FETCH o.orderItems WHERE o.user.id = :userId ORDER BY o.orderedAt DESC",
                         Orders.class
-                )
-                .setParameter("userId", userId)
+                ).setParameter("userId", userId)
                 .getResultList();
     }
 
