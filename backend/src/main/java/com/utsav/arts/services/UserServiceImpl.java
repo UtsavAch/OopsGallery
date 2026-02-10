@@ -4,11 +4,16 @@ import com.utsav.arts.exceptions.ResourceAlreadyExistsException;
 import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.models.Role;
 import com.utsav.arts.models.User;
+import com.utsav.arts.models.VerificationCode;
 import com.utsav.arts.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import com.utsav.arts.repository.VerificationCodeRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +23,11 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private VerificationCodeRepository codeRepository;
+    @Autowired
+    private EmailService emailService;
 
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder) {
@@ -36,7 +46,95 @@ public class UserServiceImpl implements UserService {
             user.setRole(Role.ROLE_USER);
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setEnabled(true); // Admins create active users by default
         return userRepository.save(user);
+    }
+
+    // REGISTER USER
+    @Override
+    public User registerUser(User user) {
+
+        Optional<User> existingOpt = userRepository.findByEmail(user.getEmail());
+
+        if (existingOpt.isPresent()) {
+            User existing = existingOpt.get();
+
+            if (existing.isEnabled()) {
+                throw new RuntimeException("Email already taken");
+            }
+
+            // User exists but NOT verified → resend code
+            resendVerification(existing.getEmail());
+            return existing;
+        }
+
+        user.setRole(Role.ROLE_USER);
+        user.setEnabled(false);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        User savedUser = userRepository.save(user);
+
+        SecureRandom random = new SecureRandom();
+        String rawCode = String.valueOf(100000 + random.nextInt(900000));
+        String hashedCode = passwordEncoder.encode(rawCode);
+
+        VerificationCode verificationCode = new VerificationCode(hashedCode, savedUser);
+        savedUser.setVerificationCode(verificationCode);
+
+        codeRepository.save(verificationCode);
+        emailService.sendVerificationEmail(savedUser.getEmail(), rawCode);
+
+        return savedUser;
+    }
+
+    // VERIFY USER
+    @Override
+    public boolean verifyUser(String email, String code) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        VerificationCode vCode = codeRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("No verification code found"));
+
+        if (passwordEncoder.matches(code, vCode.getCode()) &&
+                vCode.getExpiryDate().isAfter(LocalDateTime.now())) {
+
+            user.setEnabled(true);
+            userRepository.save(user);
+
+            // OTP auto-deleted because of orphanRemoval
+            user.setVerificationCode(null);
+
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void resendVerification(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found with email: " + email));
+
+        if (user.isEnabled()) {
+            throw new RuntimeException("User is already verified");
+        }
+
+        SecureRandom random = new SecureRandom();
+        String rawCode = String.valueOf(100000 + random.nextInt(900000));
+        String hashedCode = passwordEncoder.encode(rawCode);
+
+        VerificationCode verificationCode =
+                codeRepository.findByUser(user)
+                        .orElseGet(() -> new VerificationCode(hashedCode, user));
+
+        verificationCode.setCode(hashedCode);
+        verificationCode.setExpiryDate(LocalDateTime.now().plusMinutes(10));
+
+        codeRepository.save(verificationCode);
+
+        emailService.sendVerificationEmail(user.getEmail(), rawCode);
     }
 
     @Override
@@ -64,7 +162,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
         }
 
-        // 🔒 ROLE IS NEVER UPDATED HERE
+        // ROLE IS NEVER UPDATED HERE
         return userRepository.update(existingUser);
     }
 

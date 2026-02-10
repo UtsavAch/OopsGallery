@@ -1,7 +1,9 @@
 package com.utsav.arts.controllers;
 
+import com.utsav.arts.dtos.userDTO.ResendVerificationDTO;
 import com.utsav.arts.dtos.userDTO.UserRequestDTO;
 import com.utsav.arts.dtos.userDTO.UserResponseDTO;
+import com.utsav.arts.dtos.userDTO.VerifyRegistrationDTO;
 import com.utsav.arts.exceptions.ResourceNotFoundException;
 import com.utsav.arts.mappers.UserMapper;
 import com.utsav.arts.models.Role;
@@ -26,9 +28,10 @@ public class UserController {
         this.userService = userService;
     }
 
-    // ---------------- CREATE ----------------
-    // Public: Anyone can register
+    // ---------------- CREATE (OWNER ONLY) ----------------
+    // Restricted: Only Owners can create users directly (bypassing email verification)
     @PostMapping
+    @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<UserResponseDTO> save(@Valid @RequestBody UserRequestDTO requestDTO) {
         User user = UserMapper.toEntity(requestDTO);
         User savedUser = userService.save(user);
@@ -36,6 +39,40 @@ public class UserController {
                 UserMapper.toResponseDTO(savedUser),
                 HttpStatus.CREATED
         );
+    }
+
+    // ---------------- CREATE / REGISTER ----------------
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@Valid @RequestBody UserRequestDTO requestDTO) {
+        User user = UserMapper.toEntity(requestDTO);
+        userService.registerUser(user);
+        return ResponseEntity.ok("User registered successfully. Please check your email for the verification code.");
+    }
+
+    // ---------------- VERIFY ----------------
+    @PostMapping("/verify")
+    public ResponseEntity<String> verifyUser(@RequestBody VerifyRegistrationDTO request) {
+        boolean isVerified = userService.verifyUser(
+                request.getEmail(),
+                request.getCode()
+        );
+
+        if (isVerified) {
+            return ResponseEntity.ok("Account verified successfully!");
+        } else {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Invalid or expired verification code.");
+        }
+    }
+
+    // ---------------- RESEND VERIFICATION ----------------
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerification(
+            @RequestBody @Valid ResendVerificationDTO request
+    ) {
+        userService.resendVerification(request.getEmail());
+        return ResponseEntity.ok("Verification code resent successfully.");
     }
 
     // ---------------- UPDATE ----------------

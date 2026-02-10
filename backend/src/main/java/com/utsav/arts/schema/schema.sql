@@ -1,13 +1,28 @@
 CREATE TABLE users
 (
-    id         SERIAL PRIMARY KEY,
-    first_name VARCHAR(100) NOT NULL,
-    last_name  VARCHAR(100) NOT NULL,
-    email      VARCHAR(255) NOT NULL UNIQUE,
-    phone_no   VARCHAR(30),
-    password   TEXT         NOT NULL,
-    address    TEXT,
-    role       VARCHAR(50)  NOT NULL   -- ROLE_OWNER, ROLE_USER, ROLE_GUEST
+    id          SERIAL PRIMARY KEY,
+    first_name  VARCHAR(100) NOT NULL,
+    last_name   VARCHAR(100) NOT NULL,
+    email       VARCHAR(255) NOT NULL UNIQUE,
+    phone_no    VARCHAR(30),
+    password    TEXT         NOT NULL,
+    address     TEXT,
+    role        VARCHAR(50)  NOT NULL,     -- ROLE_OWNER, ROLE_USER, ROLE_GUEST
+    enabled     BOOLEAN      NOT NULL DEFAULT false,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE verification_codes
+(
+    id          SERIAL PRIMARY KEY,
+    code        VARCHAR(20)  NOT NULL,
+    user_id     INT          NOT NULL UNIQUE,
+    expiry_date TIMESTAMP    NOT NULL,
+
+    CONSTRAINT fk_verification_user
+        FOREIGN KEY (user_id)
+            REFERENCES users (id)
+            ON DELETE CASCADE
 );
 
 CREATE TABLE artworks

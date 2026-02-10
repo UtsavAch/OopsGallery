@@ -10,6 +10,10 @@ public interface UserService {
 
     User save(User user);
 
+    User registerUser(User user);
+
+    boolean verifyUser(String email, String code);
+
     User update(User user);
 
     User updateRole(int userId, Role role);
@@ -25,4 +29,7 @@ public interface UserService {
     boolean existsByEmail(String email);
 
     boolean isUserOwner(int userId, String email);
+
+    void resendVerification(String email);
+
 }
