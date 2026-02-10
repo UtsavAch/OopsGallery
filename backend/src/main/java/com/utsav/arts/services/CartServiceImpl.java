@@ -9,16 +9,31 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+/**
+ * Implementation of {@link CartService}.
+ * Handles business logic for creating, updating, retrieving, and deleting shopping carts.
+ */
 @Service("cartService")
 @Transactional
 public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepository;
 
+    /**
+     * Constructs a CartServiceImpl with the given repository.
+     *
+     * @param cartRepository Repository for CRUD operations on Cart entities
+     */
     public CartServiceImpl(CartRepository cartRepository) {
         this.cartRepository = cartRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Enforces business rule: One cart per user.
+     * Automatically recalculates totals before saving.
+     */
     @Override
     public Cart save(Cart cart) {
         // Checking business rule: One cart per user
@@ -26,7 +41,6 @@ public class CartServiceImpl implements CartService {
             // New cart being created
             cartRepository.findByUserId(cart.getUser().getId())
                     .ifPresent(existing -> {
-                        // Use ResourceAlreadyExistsException for a 409 Conflict status
                         throw new ResourceAlreadyExistsException("User with ID " + cart.getUser().getId() + " already has a cart.");
                     });
         } else {
@@ -40,17 +54,28 @@ public class CartServiceImpl implements CartService {
         return cartRepository.save(cart);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Cart> findById(int id) {
         // Optional is returned so the Controller can throw ResourceNotFound if empty
         return cartRepository.findById(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Cart> findByUserId(int userId) {
         return cartRepository.findByUserId(userId);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Ensures consistent 404 behavior if cart does not exist.
+     */
     @Override
     public void deleteById(int id) {
         // Ensure consistent 404 behavior for deletions
@@ -60,6 +85,9 @@ public class CartServiceImpl implements CartService {
         cartRepository.deleteById(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public boolean isOwner(int cartId, int userId) {
         return cartRepository.findById(cartId)
                 .map(cart -> cart.getUser().getId() == userId)

@@ -2,7 +2,6 @@ package com.utsav.arts.mappers;
 
 import com.utsav.arts.dtos.userDTO.UserRequestDTO;
 import com.utsav.arts.dtos.userDTO.UserResponseDTO;
-import com.utsav.arts.models.Role;
 import com.utsav.arts.models.User;
 
 public class UserMapper {

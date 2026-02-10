@@ -10,6 +10,14 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JPA-based implementation of {@link UserRepository}.
+ *
+ * <p>
+ * Uses {@link EntityManager} and JPQL queries to manage
+ * {@link User} persistence and retrieval.
+ * </p>
+ */
 @Repository
 @Transactional
 public class UserRepositoryImpl implements UserRepository {
@@ -17,22 +25,34 @@ public class UserRepositoryImpl implements UserRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User save(User user) {
         entityManager.persist(user);
         return user;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User update(User user) {
         return entityManager.merge(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<User> findById(int id) {
         return Optional.ofNullable(entityManager.find(User.class, id));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<User> findByEmail(String email) {
         try {
@@ -49,6 +69,9 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<User> findAll() {
         return entityManager.createQuery(
@@ -57,6 +80,9 @@ public class UserRepositoryImpl implements UserRepository {
         ).getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteById(int id) {
         User user = entityManager.find(User.class, id);
@@ -65,6 +91,9 @@ public class UserRepositoryImpl implements UserRepository {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean existsByEmail(String email) {
         Long count = entityManager.createQuery(

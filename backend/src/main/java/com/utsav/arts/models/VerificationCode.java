@@ -3,6 +3,10 @@ package com.utsav.arts.models;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a verification code used for confirming a user's email.
+ * The code expires after a certain period.
+ */
 @Entity
 @Table(name = "verification_codes")
 public class VerificationCode {
@@ -21,8 +25,16 @@ public class VerificationCode {
     @Column(nullable = false)
     private LocalDateTime expiryDate;
 
+    /** Default constructor for JPA */
     public VerificationCode() {}
 
+    /**
+     * Constructs a verification code for a user.
+     * Sets expiry time to 15 minutes from creation.
+     *
+     * @param code The verification code
+     * @param user The user associated with the code
+     */
     public VerificationCode(String code, User user) {
         this.code = code;
         this.user = user;

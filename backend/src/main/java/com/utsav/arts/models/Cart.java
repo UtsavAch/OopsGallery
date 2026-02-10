@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a shopping cart for a user, containing multiple CartItems.
+ * Provides auto-calculation of total items and total price.
+ */
 @Entity
 public class Cart {
 
@@ -23,8 +27,13 @@ public class Cart {
 
     private BigDecimal totalPrice;
 
+    /** Default constructor for JPA */
     public Cart() {}
 
+    /**
+     * Creates a Cart for a specific user.
+     * @param user The user owning this cart.
+     */
     public Cart(User user) {
         this.user = user;
         this.items = new ArrayList<>();
@@ -45,7 +54,9 @@ public class Cart {
     public int getTotalItems() { return totalItems; }
     public BigDecimal getTotalPrice() { return totalPrice; }
 
-    // ---------------- Auto-recalculate totals ----------------
+    /**
+     * Recalculates the total items and total price of the cart.
+     */
     public void recalculateTotals() {
         if (items == null || items.isEmpty()) {
             this.totalItems = 0;

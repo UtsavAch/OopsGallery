@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents an order placed by a user.
+ * Contains multiple OrderItems and tracks the status, total price, and delivery details.
+ */
 @Entity
 @Table(name = "orders")
 public class Orders {
@@ -19,7 +23,7 @@ public class Orders {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Changed: One-to-Many relationship with OrderItem
+    // One-to-Many relationship with OrderItem
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
@@ -33,6 +37,7 @@ public class Orders {
     @Column(name = "ordered_at")
     private LocalDateTime orderedAt;
 
+    /** Default constructor for JPA */
     public Orders() {}
 
     // Getters and Setters
@@ -57,7 +62,11 @@ public class Orders {
     public LocalDateTime getOrderedAt() { return orderedAt; }
     public void setOrderedAt(LocalDateTime orderedAt) { this.orderedAt = orderedAt; }
 
-    // Helper method to add items comfortably
+    /**
+     * Adds an item to this order and sets the relationship properly.
+     *
+     * @param item OrderItem to add
+     */
     public void addOrderItem(OrderItem item) {
         orderItems.add(item);
         item.setOrder(this);

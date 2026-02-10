@@ -11,6 +11,14 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JPA-based implementation of {@link PaymentRepository}.
+ *
+ * <p>
+ * Uses {@link EntityManager} to perform persistence operations
+ * and JPQL queries for {@link Payment} entities.
+ * </p>
+ */
 @Repository
 @Transactional
 public class PaymentRepositoryImpl implements PaymentRepository {
@@ -24,16 +32,25 @@ public class PaymentRepositoryImpl implements PaymentRepository {
         return payment;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Payment update(Payment payment) {
         return entityManager.merge(payment);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Payment> findById(int id) {
         return Optional.ofNullable(entityManager.find(Payment.class, id));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Payment> findByTransactionId(String transactionId) {
         try {
@@ -50,6 +67,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Payment> findByUserId(int userId) {
         return entityManager.createQuery(
@@ -60,6 +80,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
                 .getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Payment> findByOrderId(int orderId) {
         return entityManager.createQuery(
@@ -70,6 +93,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
                 .getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Payment> findByStatus(PaymentStatus status) {
         return entityManager.createQuery(
@@ -80,6 +106,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
                 .getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Payment> findAll() {
         return entityManager.createQuery(
@@ -88,6 +117,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
         ).getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteById(int id) {
         Payment payment = entityManager.find(Payment.class, id);

@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
+/**
+ * Represents an item in an order.
+ * Stores a snapshot of the artwork price at the time of purchase to maintain historical accuracy.
+ */
 @Entity
 @Table(name = "order_items")
 public class OrderItem {
@@ -26,8 +30,17 @@ public class OrderItem {
     // If Artwork price changes later, this historical record remains correct.
     private BigDecimal priceAtPurchase;
 
+    /** Default constructor for JPA */
     public OrderItem() {}
 
+    /**
+     * Constructs a new OrderItem.
+     *
+     * @param order The order it belongs to
+     * @param artwork The artwork being purchased
+     * @param quantity Quantity purchased
+     * @param priceAtPurchase Price at purchase time
+     */
     public OrderItem(Orders order, Artwork artwork, int quantity, BigDecimal priceAtPurchase) {
         this.order = order;
         this.artwork = artwork;

@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of {@link OrdersService}.
+ * Handles business logic for placing, updating, retrieving, and deleting orders.
+ */
 @Service("ordersService")
 @Transactional
 public class OrdersServiceImpl implements OrdersService {
@@ -22,6 +26,13 @@ public class OrdersServiceImpl implements OrdersService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Constructs an OrdersServiceImpl with required repositories.
+     *
+     * @param ordersRepository Repository for order CRUD operations
+     * @param cartRepository   Repository for user cart operations
+     * @param userRepository   Repository for user operations
+     */
     public OrdersServiceImpl(OrdersRepository ordersRepository,
                              CartRepository cartRepository,
                              UserRepository userRepository) {
@@ -30,6 +41,9 @@ public class OrdersServiceImpl implements OrdersService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Orders placeOrder(int userId, String address) {
         User user = userRepository.findById(userId)
@@ -67,6 +81,9 @@ public class OrdersServiceImpl implements OrdersService {
         return ordersRepository.save(order);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Orders confirmOrder(int orderId) {
         Orders order = ordersRepository.findById(orderId)
@@ -82,6 +99,9 @@ public class OrdersServiceImpl implements OrdersService {
         return ordersRepository.update(order);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Orders shipOrder(int orderId) {
         Orders order = ordersRepository.findById(orderId)
@@ -95,6 +115,9 @@ public class OrdersServiceImpl implements OrdersService {
         return ordersRepository.update(order);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Orders deliverOrder(int orderId) {
         Orders order = ordersRepository.findById(orderId)
@@ -108,6 +131,9 @@ public class OrdersServiceImpl implements OrdersService {
         return ordersRepository.update(order);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Orders cancelOrder(int orderId) {
         Orders order = ordersRepository.findById(orderId)
@@ -121,27 +147,41 @@ public class OrdersServiceImpl implements OrdersService {
         return ordersRepository.update(order);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<Orders> findById(int id) {
         return ordersRepository.findById(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Orders> findAll() {
         return ordersRepository.findAll();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Orders> findByUserId(int userId) {
         return ordersRepository.findByUserId(userId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Orders> findByStatus(OrderStatus status) {
         return ordersRepository.findByStatus(status);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteById(int id) {
         // Ensure the order exists before deleting, or throw 404
@@ -151,6 +191,9 @@ public class OrdersServiceImpl implements OrdersService {
         ordersRepository.deleteById(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isOwner(int orderId, int userId) {
         return ordersRepository.findById(orderId)

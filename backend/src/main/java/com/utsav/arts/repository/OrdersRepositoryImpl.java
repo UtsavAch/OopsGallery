@@ -10,23 +10,43 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JPA implementation of {@link OrdersRepository}.
+ * <p>
+ * Uses {@link EntityManager} for persistence and explicitly fetches
+ * order items to avoid lazy loading issues.
+ */
 @Repository
 @Transactional
 public class OrdersRepositoryImpl implements OrdersRepository {
 
+    /**
+     * JPA EntityManager used for database operations.
+     */
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Orders save(Orders order) {
         return entityManager.merge(order);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Orders update(Orders order) {
         return entityManager.merge(order);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Fetches order items eagerly to ensure the order is fully initialized.
+     */
     @Override
     public Optional<Orders> findById(int id) {
         try {
@@ -41,6 +61,11 @@ public class OrdersRepositoryImpl implements OrdersRepository {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Orders are returned in descending order of creation time.
+     */
     @Override
     public List<Orders> findAll() {
         return entityManager.createQuery(
@@ -49,6 +74,11 @@ public class OrdersRepositoryImpl implements OrdersRepository {
         ).getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Fetches order items eagerly and sorts results by most recent orders first.
+     */
     @Override
     public List<Orders> findByUserId(int userId) {
         return entityManager.createQuery(
@@ -58,6 +88,9 @@ public class OrdersRepositoryImpl implements OrdersRepository {
                 .getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Orders> findByArtworkId(int artworkId) {
         // FIXED: Joined 'orderItems' because 'Orders' no longer has a direct 'artwork' field.
@@ -70,6 +103,9 @@ public class OrdersRepositoryImpl implements OrdersRepository {
                 .getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<Orders> findByStatus(OrderStatus status) {
         return entityManager.createQuery(
@@ -80,6 +116,9 @@ public class OrdersRepositoryImpl implements OrdersRepository {
                 .getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteById(int id) {
         Orders order = entityManager.find(Orders.class, id);

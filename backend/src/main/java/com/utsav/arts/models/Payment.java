@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a payment made by a user for an order.
+ */
 @Entity
 @Table(name = "payments")
 public class Payment {
@@ -38,10 +41,12 @@ public class Payment {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    // Default constructor for JPA
+    /** Default constructor for JPA */
     public Payment() {}
 
-    // Convenience constructor
+    /**
+     * Constructs a Payment with all fields.
+     */
     public Payment(int id, Orders order, User user, BigDecimal amount, String currency, String method, PaymentStatus status, String transactionId, LocalDateTime createdAt) {
         this.id = id;
         this.order = order;

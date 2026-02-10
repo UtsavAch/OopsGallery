@@ -3,6 +3,10 @@ package com.utsav.arts.models;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a user of the online art gallery system.
+ * Stores personal information, authentication details, role, and verification code.
+ */
 @Entity
 @Table(name = "users")
 public class User {
@@ -40,7 +44,7 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private VerificationCode verificationCode;
 
-
+    /** Default constructor for JPA */
     public User() {}
 
     // Getters & Setters

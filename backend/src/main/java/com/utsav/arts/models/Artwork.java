@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
+/**
+ * Represents an artwork that can be listed and sold in the gallery.
+ */
 @Entity
 @Table(name = "artworks")
 public class Artwork {
@@ -27,9 +30,12 @@ public class Artwork {
 
     private String imgUrl;
 
+    /** Default constructor for JPA */
     public Artwork() {}
 
-    // Constructor for convenience
+    /**
+     * Constructor to create an Artwork object with all fields.
+     */
     public Artwork(int id, String title, String description, ArtCategory category, String label, BigDecimal price,String imgUrl) {
         this.id = id;
         this.title = title;

@@ -17,6 +17,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of {@link UserService}.
+ * Handles user CRUD, registration, verification, password encoding, role management, and verification emails.
+ */
 @Service("userService")
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -29,12 +33,21 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private EmailService emailService;
 
+    /**
+     * Constructs UserServiceImpl with required dependencies.
+     *
+     * @param userRepository  Repository for user CRUD operations
+     * @param passwordEncoder Password encoder for hashing passwords
+     */
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User save(User user) {
         //Email must be unique
@@ -50,7 +63,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    // REGISTER USER
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User registerUser(User user) {
 
@@ -87,7 +102,9 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
 
-    // VERIFY USER
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean verifyUser(String email, String code) {
         User user = userRepository.findByEmail(email)
@@ -110,6 +127,9 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void resendVerification(String email) {
 
@@ -137,6 +157,9 @@ public class UserServiceImpl implements UserService {
         emailService.sendVerificationEmail(user.getEmail(), rawCode);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User update(User user) {
         User existingUser = userRepository.findById(user.getId())
@@ -166,6 +189,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.update(existingUser);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User updateRole(int userId, Role role) {
         User user = userRepository.findById(userId)
@@ -176,36 +202,53 @@ public class UserServiceImpl implements UserService {
         return userRepository.update(user);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<User> findById(int id) {
         // Return Optional so the Controller can decide whether to throw or return 404
         return userRepository.findById(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteById(int id) {
-        // Updated: Use ResourceNotFoundException instead of IllegalArgumentException
         if (userRepository.findById(id).isEmpty()) {
             throw new ResourceNotFoundException("Cannot delete: User not found with id: " + id);
         }
         userRepository.deleteById(id);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isUserOwner(int userId, String email) {
         return findById(userId)

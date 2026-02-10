@@ -2,6 +2,9 @@ package com.utsav.arts.models;
 
 import jakarta.persistence.*;
 
+/**
+ * Represents a single item inside a shopping cart.
+ */
 @Entity
 public class CartItem {
 
@@ -19,8 +22,12 @@ public class CartItem {
 
     private int quantity;
 
+    /** Default constructor for JPA */
     public CartItem() {}
 
+    /**
+     * Creates a CartItem for a specific artwork and quantity.
+     */
     public CartItem(Cart cart, Artwork artwork, int quantity) {
         this.cart = cart;
         this.artwork = artwork;
@@ -39,6 +46,10 @@ public class CartItem {
 
     public int getQuantity() { return quantity; }
 
+    /**
+     * Sets the quantity of this cart item.
+     * @param quantity Must be at least 1.
+     */
     public void setQuantity(int quantity) {
         if (quantity < 1) {
             throw new IllegalArgumentException("Quantity must be at least 1");

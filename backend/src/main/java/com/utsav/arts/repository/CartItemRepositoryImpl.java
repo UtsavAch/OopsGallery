@@ -10,10 +10,19 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JPA implementation of {@link CartItemRepository}.
+ * <p>
+ * Uses {@link EntityManager} to perform persistence operations on
+ * {@link CartItem} entities.
+ */
 @Repository
 @Transactional
 public class CartItemRepositoryImpl implements CartItemRepository {
 
+    /**
+     * JPA EntityManager used for database operations.
+     */
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -23,16 +32,25 @@ public class CartItemRepositoryImpl implements CartItemRepository {
         return cartItem;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public CartItem update(CartItem cartItem) {
         return entityManager.merge(cartItem);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<CartItem> findById(int id) {
         return Optional.ofNullable(entityManager.find(CartItem.class, id));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<CartItem> findByCartId(int cartId) {
         return entityManager.createQuery(
@@ -43,6 +61,9 @@ public class CartItemRepositoryImpl implements CartItemRepository {
                 .getResultList();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<CartItem> findByCartIdAndArtworkId(int cartId, int artworkId) {
         try {
@@ -60,6 +81,9 @@ public class CartItemRepositoryImpl implements CartItemRepository {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteById(int id) {
         CartItem cartItem = entityManager.find(CartItem.class, id);
@@ -68,6 +92,9 @@ public class CartItemRepositoryImpl implements CartItemRepository {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteByCartId(int cartId) {
         entityManager.createQuery(
