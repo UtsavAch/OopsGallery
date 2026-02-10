@@ -22,6 +22,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.util.Map;
 
+/**
+ * Spring Security configuration class.
+ *
+ * <p>Sets up authentication, authorization, password encoding, JWT filter, and custom error handling.
+ * Uses stateless session management since authentication is handled via JWT.
+ *
+ * <p>Access rules:
+ * <ul>
+ *     <li>/api/auth/** → public</li>
+ *     <li>/api/users/register, /api/users/verify, /api/users/resend-verification → public</li>
+ *     <li>/api/users (POST) → OWNER only</li>
+ *     <li>/api/users/** (GET) → public</li>
+ *     <li>/api/stripe/webhook → public</li>
+ *     <li>All other endpoints → authenticated users only</li>
+ * </ul>
+ */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
@@ -38,11 +54,21 @@ public class SecurityConfig {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Password encoder bean using BCrypt hashing.
+     *
+     * @return a {@link PasswordEncoder} instance
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configures a DAO-based authentication provider using the user details service and password encoder.
+     *
+     * @return the configured {@link DaoAuthenticationProvider}
+     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
@@ -50,11 +76,25 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    /**
+     * Provides the {@link AuthenticationManager} bean used for authentication.
+     *
+     * @param authConfig the {@link AuthenticationConfiguration} provided by Spring
+     * @return the {@link AuthenticationManager}
+     * @throws Exception if authentication manager cannot be created
+     */
     @Bean
     public AuthenticationManager authenticationManager(@NonNull AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
+    /**
+     * Configures HTTP security including route authorization, exception handling, session management, and JWT filter.
+     *
+     * @param http the {@link HttpSecurity} object to configure
+     * @return the configured {@link SecurityFilterChain}
+     * @throws Exception if configuration fails
+     */
     @Bean
     public SecurityFilterChain filterChain(@NonNull HttpSecurity http) throws Exception {
         http

@@ -3,8 +3,17 @@ package com.utsav.arts.mappers;
 import com.utsav.arts.dtos.paymentDTO.PaymentResponseDTO;
 import com.utsav.arts.models.Payment;
 
+/**
+ * Mapper class for Payment entity to PaymentResponseDTO.
+ *
+ * <p>Provides method to convert Payment → PaymentResponseDTO.
+ */
 public class PaymentMapper {
-    // Map Entity → Response DTO
+    /**
+     * Converts a Payment entity to PaymentResponseDTO.
+     * @param payment Payment entity
+     * @return PaymentResponseDTO with mapped fields
+     */
     public static PaymentResponseDTO toResponseDTO(Payment payment) {
         PaymentResponseDTO dto = new PaymentResponseDTO();
         dto.setId(payment.getId());

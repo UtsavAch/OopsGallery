@@ -4,6 +4,21 @@ import com.utsav.arts.dtos.cartItemDTO.CartItemResponseDTO;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Data Transfer Object used to send cart data to clients.
+ *
+ * <p>Represents a cart including its items, totals, and ownership information.</p>
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>id – cart identifier</li>
+ *   <li>userId – ID of the user who owns the cart</li>
+ *   <li>cartItems – list of items in the cart</li>
+ *   <li>totalItems – total number of items in the cart</li>
+ *   <li>totalPrice – total price of all items in the cart</li>
+ * </ul>
+ * </p>
+ */
 public class CartResponseDTO {
 
     private int id;

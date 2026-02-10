@@ -9,6 +9,13 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Implementation of {@link FileStorageService} using Supabase Storage.
+ *
+ * <p>Provides functionality to upload and delete files in a Supabase storage bucket.
+ * Files are stored with unique filenames to avoid collisions, and uploaded files
+ * can be accessed via a public URL.
+ */
 @Service
 public class SupabaseStorageImpl implements FileStorageService {
 
@@ -23,10 +30,25 @@ public class SupabaseStorageImpl implements FileStorageService {
 
     private final RestClient restClient;
 
+    /**
+     * Constructs a {@code SupabaseStorageImpl} instance with a {@link RestClient.Builder}.
+     *
+     * @param builder the RestClient builder used to create a RestClient instance
+     */
     public SupabaseStorageImpl(RestClient.Builder builder) {
         this.restClient = builder.build();
     }
 
+    /**
+     * Uploads a file to Supabase storage.
+     *
+     * <p>The file is given a unique filename by prepending a UUID to the original filename
+     * to avoid collisions. The method returns a public URL to access the uploaded file.
+     *
+     * @param file the {@link MultipartFile} to upload
+     * @return the public URL of the uploaded file
+     * @throws RuntimeException if the file cannot be read or uploaded
+     */
     @Override
     public String upload(MultipartFile file) {
         try {
@@ -52,6 +74,14 @@ public class SupabaseStorageImpl implements FileStorageService {
         }
     }
 
+    /**
+     * Deletes a file from Supabase storage.
+     *
+     * <p>The method extracts the filename from the provided public URL and deletes
+     * the corresponding object in the configured bucket.
+     *
+     * @param fileUrl the public URL of the file to delete
+     */
     @Override
     public void delete(String fileUrl) {
         if (fileUrl == null || fileUrl.isBlank()) return;

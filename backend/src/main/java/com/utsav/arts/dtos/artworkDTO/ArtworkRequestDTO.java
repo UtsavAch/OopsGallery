@@ -4,6 +4,22 @@ import com.utsav.arts.models.ArtCategory;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 
+/**
+ * Data Transfer Object used to receive artwork creation or update data from clients.
+ *
+ * <p>This DTO is validated at the controller layer and represents the required
+ * and optional attributes needed to create or modify an artwork.</p>
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>title – artwork title</li>
+ *   <li>description – artwork description</li>
+ *   <li>category – artwork category (enum)</li>
+ *   <li>label – optional tag or label</li>
+ *   <li>price – artwork price</li>
+ * </ul>
+ * </p>
+ */
 public class ArtworkRequestDTO {
 
     @NotBlank(message = "Title is required")

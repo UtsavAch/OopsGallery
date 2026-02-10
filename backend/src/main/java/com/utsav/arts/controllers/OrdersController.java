@@ -18,6 +18,26 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Controller to manage customer orders.
+ *
+ * <p>Supports placing orders, viewing orders, updating order status, and deleting orders.
+ * Access is restricted to authenticated users with roles USER or OWNER.
+ *
+ * <p>Endpoints:
+ * <ul>
+ *     <li>POST /api/orders → Place an order</li>
+ *     <li>GET /api/orders/{id} → Get order by ID</li>
+ *     <li>GET /api/orders → Get all orders (OWNER only)</li>
+ *     <li>GET /api/orders/user/{userId} → Get orders for a user</li>
+ *     <li>GET /api/orders/status/{status} → Get orders by status (OWNER only)</li>
+ *     <li>POST /api/orders/{id}/confirm → Confirm order (OWNER only)</li>
+ *     <li>POST /api/orders/{id}/ship → Ship order (OWNER only)</li>
+ *     <li>POST /api/orders/{id}/deliver → Mark order as delivered (OWNER only)</li>
+ *     <li>POST /api/orders/{id}/cancel → Cancel order</li>
+ *     <li>DELETE /api/orders/{id} → Delete order (OWNER only)</li>
+ * </ul>
+ */
 @RestController
 @RequestMapping("/api/orders")
 @PreAuthorize("hasAnyRole('USER', 'OWNER')")
@@ -30,6 +50,13 @@ public class OrdersController {
     }
 
     // ---------------- PLACE ORDER ----------------
+    /**
+     * Places a new order for the authenticated user.
+     *
+     * @param request DTO containing order details like shipping address
+     * @param authentication Current authenticated user
+     * @return Created OrdersResponseDTO
+     */
     @PostMapping
     @PreAuthorize("hasAnyRole('USER', 'OWNER')")
     public ResponseEntity<OrdersResponseDTO> placeOrder(
@@ -39,7 +66,6 @@ public class OrdersController {
         // Extract userId from authenticated principal for security
         int userId = ((UserPrincipal) Objects.requireNonNull(authentication.getPrincipal())).getId();
 
-        // Service now handles business logic errors (e.g., empty cart) via InvalidRequestException
         Orders order = ordersService.placeOrder(
                 userId,
                 request.getAddress()
@@ -50,7 +76,9 @@ public class OrdersController {
     }
 
     // ---------------- READ ----------------
-
+    /**
+     * Retrieves an order by ID.
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @ordersService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<OrdersResponseDTO> findById(@PathVariable int id) {
@@ -61,6 +89,9 @@ public class OrdersController {
         return ResponseEntity.ok(OrdersMapper.toDTO(order));
     }
 
+    /**
+     * Retrieves all orders (OWNER only).
+     */
     @GetMapping
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<OrdersResponseDTO>> findAll() {
@@ -72,6 +103,9 @@ public class OrdersController {
         return ResponseEntity.ok(orders);
     }
 
+    /**
+     * Retrieves all orders for a specific user.
+     */
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('OWNER') or authentication.principal.id == #userId")
     public ResponseEntity<List<OrdersResponseDTO>> findByUserId(
@@ -85,6 +119,9 @@ public class OrdersController {
         return ResponseEntity.ok(orders);
     }
 
+    /**
+     * Retrieves orders by status (OWNER only).
+     */
     @GetMapping("/status/{status}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<OrdersResponseDTO>> findByStatus(
@@ -99,7 +136,10 @@ public class OrdersController {
     }
 
     // ---------------- UPDATE ----------------
-    // OWNER ONLY, emergency/manual override
+    /**
+     * Confirm an order. Can be called by OWNER only.
+     * (Note: In a real system, this might be triggered by payment confirmation rather than manual action).
+     */
     @PostMapping("/{id}/confirm")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<OrdersResponseDTO> confirmOrder(@PathVariable int id) {
@@ -107,6 +147,9 @@ public class OrdersController {
         return ResponseEntity.ok(OrdersMapper.toDTO(updated));
     }
 
+    /**
+     * Ship an order. Can be called by OWNER only.
+     */
     @PostMapping("/{id}/ship")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<OrdersResponseDTO> shipOrder(@PathVariable int id) {
@@ -114,6 +157,9 @@ public class OrdersController {
         return ResponseEntity.ok(OrdersMapper.toDTO(updated));
     }
 
+    /**
+     * Deliver an order. Can be called by OWNER only.
+     */
     @PostMapping("/{id}/deliver")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<OrdersResponseDTO> deliverOrder(@PathVariable int id) {
@@ -121,6 +167,9 @@ public class OrdersController {
         return ResponseEntity.ok(OrdersMapper.toDTO(updated));
     }
 
+    /**
+     * Cancels an order. Can be called by OWNER or the order owner.
+     */
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasRole('OWNER') or @ordersService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<OrdersResponseDTO> cancelOrder(@PathVariable int id) {
@@ -129,6 +178,9 @@ public class OrdersController {
     }
 
     // ---------------- DELETE ----------------
+    /**
+     * Deletes an order (OWNER only).
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> delete(@PathVariable int id) {

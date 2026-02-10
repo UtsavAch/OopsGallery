@@ -26,6 +26,24 @@ import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Controller for managing payments.
+ *
+ * <p>Supports viewing payments, creating Stripe payment intents, deleting payments,
+ * and retrieving available payment statuses.
+ *
+ * <p>Endpoints:
+ * <ul>
+ *     <li>GET /api/payments → Get all payments (OWNER only)</li>
+ *     <li>GET /api/payments/{id} → Get payment by ID</li>
+ *     <li>GET /api/payments/user/{userId} → Get payments for a user</li>
+ *     <li>GET /api/payments/order/{orderId} → Get payments for an order</li>
+ *     <li>GET /api/payments/status/{status} → Get payments by status (OWNER only)</li>
+ *     <li>POST /api/payments/intent → Create a Stripe PaymentIntent</li>
+ *     <li>DELETE /api/payments/{id} → Delete payment (OWNER only)</li>
+ *     <li>GET /api/payments/payment-statuses → Get all payment status options (OWNER only)</li>
+ * </ul>
+ */
 @RestController
 @RequestMapping("/api/payments")
 @PreAuthorize("hasAnyRole('USER', 'OWNER')")
@@ -44,6 +62,14 @@ public class PaymentController {
     }
 
     // ---------------- READ ----------------
+    /**
+     * Retrieves a payment by its ID.
+     *
+     * @param id Payment ID
+     * @return {@link PaymentResponseDTO} for the requested payment
+     * @throws ResourceNotFoundException if payment does not exist
+     * @apiNote Accessible by OWNER or the payment owner
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @paymentService.isPaymentOwner(#id, authentication.principal.id)")
     public ResponseEntity<PaymentResponseDTO> findById(@PathVariable int id) {
@@ -53,6 +79,14 @@ public class PaymentController {
         return ResponseEntity.ok(PaymentMapper.toResponseDTO(payment));
     }
 
+    /**
+     * Retrieves all payments associated with a specific user.
+     *
+     * @param userId ID of the user
+     * @return List of {@link PaymentResponseDTO} for the user
+     * @throws ResourceNotFoundException if the user does not exist
+     * @apiNote Accessible by OWNER or the user themselves
+     */
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('OWNER') or #userId == authentication.principal.id")
     public ResponseEntity<List<PaymentResponseDTO>> findByUserId(@PathVariable int userId) {
@@ -67,6 +101,13 @@ public class PaymentController {
         return ResponseEntity.ok(payments);
     }
 
+    /**
+     * Retrieves all payments associated with a specific order.
+     *
+     * @param orderId ID of the order
+     * @return List of {@link PaymentResponseDTO} for the order
+     * @apiNote Accessible by OWNER or the order owner
+     */
     @GetMapping("/order/{orderId}")
     @PreAuthorize("hasRole('OWNER') or @ordersService.isOwner(#orderId, authentication.principal.id)")
     public ResponseEntity<List<PaymentResponseDTO>> findByOrderId(@PathVariable int orderId) {
@@ -77,6 +118,14 @@ public class PaymentController {
         return ResponseEntity.ok(payments);
     }
 
+    /**
+     * Retrieves all payments filtered by payment status.
+     *
+     * @param status Payment status as a string (case-insensitive)
+     * @return List of {@link PaymentResponseDTO} with the requested status
+     * @throws InvalidRequestException if the status is invalid
+     * @apiNote Accessible by OWNER only
+     */
     @GetMapping("/status/{status}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<PaymentResponseDTO>> findByStatus(@PathVariable String status) {
@@ -95,6 +144,12 @@ public class PaymentController {
         return ResponseEntity.ok(payments);
     }
 
+    /**
+     * Retrieves all payments in the system.
+     *
+     * @return List of all {@link PaymentResponseDTO}
+     * @apiNote Accessible by OWNER only
+     */
     @GetMapping
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<PaymentResponseDTO>> findAll() {
@@ -106,6 +161,17 @@ public class PaymentController {
     }
 
     // ---------------- CREATE PAYMENT INTENT ----------------
+    /**
+     * Creates a Stripe PaymentIntent for a given order.
+     *
+     * <p>Verifies that the authenticated user owns the order.
+     *
+     * @param requestDTO DTO containing order ID and currency
+     * @param authentication Authentication object with current user details
+     * @return Map containing the Stripe {@code clientSecret} for frontend payment processing
+     * @throws ResourceNotFoundException if the order does not exist
+     * @apiNote Accessible by OWNER or USER
+     */
     @PostMapping("/intent")
     @PreAuthorize("hasRole('OWNER') or hasRole('USER')")
     public ResponseEntity<Map<String, String>> createPaymentIntent(
@@ -139,6 +205,13 @@ public class PaymentController {
 
 
     // ---------------- DELETE ----------------
+    /**
+     * Deletes a payment by ID.
+     *
+     * @param id Payment ID
+     * @return {@code 204 No Content} on successful deletion
+     * @apiNote Accessible by OWNER only
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
@@ -147,6 +220,12 @@ public class PaymentController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Retrieves all available payment status values.
+     *
+     * @return List of payment status names as strings
+     * @apiNote Accessible by OWNER only
+     */
     @GetMapping("/payment-statuses")
     @PreAuthorize("hasRole('OWNER')")
     public List<String> getPaymentStatuses() {

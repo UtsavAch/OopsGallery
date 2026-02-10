@@ -20,6 +20,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Filter that handles JWT-based authentication for incoming requests.
+ *
+ * <p>Extracts the JWT token from the "Authorization" header, validates it, and
+ * sets the {@link SecurityContextHolder} if the token is valid.
+ *
+ * <p>Invalid or expired tokens result in a 401 Unauthorized response with a JSON body.
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -35,13 +43,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * Filters each HTTP request to validate JWT tokens.
+     *
+     * <p>If a valid token is present, the user is authenticated for the current request.
+     * Otherwise, the request is either passed through (for public routes) or rejected.
+     *
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @param filterChain the filter chain
+     * @throws ServletException in case of servlet errors
+     * @throws IOException in case of I/O errors
+     */
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            // 1. Ignore preflight
+            // Ignore preflight
             if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
                 filterChain.doFilter(request, response);
                 return;
@@ -49,7 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String authHeader = request.getHeader("Authorization");
 
-            // 2. No Token found - let it pass (SecurityConfig will decide if the route is public or private)
+            // No Token found - let it pass (SecurityConfig will decide if the route is public or private)
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
                 return;
@@ -57,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String jwt = authHeader.substring(7);
 
-            // 3. Validate Token
+            // Validate Token
             if (jwtUtils.validateJwtToken(jwt)) {
                 String email = jwtUtils.getEmailFromJwtToken(jwt);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
@@ -91,7 +111,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Helper method to send a JSON error response back to the client.
+     * Sends a JSON error response and clears the security context.
+     *
+     * @param response the HTTP response
+     * @param message the error message
+     * @param status the HTTP status code
+     * @throws IOException if writing to response fails
      */
     private void handleException(HttpServletResponse response, String message, int status) throws IOException {
         SecurityContextHolder.clearContext();

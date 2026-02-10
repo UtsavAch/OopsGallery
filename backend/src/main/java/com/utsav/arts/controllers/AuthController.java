@@ -12,6 +12,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller responsible for user authentication.
+ *
+ * <p>Currently supports:
+ * <ul>
+ *     <li>POST /api/auth/login → Authenticate user and return JWT token</li>
+ * </ul>
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -26,6 +34,15 @@ public class AuthController {
         this.jwtUtils = jwtUtils;
     }
 
+    /**
+     * Authenticates a user using email and password.
+     *
+     * <p>If authentication is successful, returns a JWT token along with user details.
+     * On failure, throws InvalidRequestException with a generic "Invalid credentials" message.
+     *
+     * @param request LoginRequestDTO containing email and password
+     * @return LoginResponseDTO containing JWT token and user info
+     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody @NotNull LoginRequestDTO request) {
         // 1. Check if user exists by email

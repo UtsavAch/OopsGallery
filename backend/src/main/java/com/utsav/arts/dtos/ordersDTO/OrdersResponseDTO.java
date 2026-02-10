@@ -4,6 +4,21 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Data Transfer Object representing an order returned to the client.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>id – unique identifier of the order</li>
+ *   <li>userId – ID of the user who placed the order</li>
+ *   <li>items – list of OrderItemResponseDTO objects representing the order items</li>
+ *   <li>totalPrice – total price of the order</li>
+ *   <li>address – delivery address of the order</li>
+ *   <li>status – current status of the order</li>
+ *   <li>orderedAt – timestamp when the order was placed</li>
+ * </ul>
+ * </p>
+ */
 public class OrdersResponseDTO {
 
     private int id;

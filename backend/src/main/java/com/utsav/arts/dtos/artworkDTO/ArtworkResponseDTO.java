@@ -4,6 +4,24 @@ import com.utsav.arts.models.ArtCategory;
 
 import java.math.BigDecimal;
 
+/**
+ * Data Transfer Object used to send artwork data to clients.
+ *
+ * <p>This DTO represents the public-facing view of an artwork and is used
+ * in API responses. It excludes internal or persistence-related fields.</p>
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>id – artwork identifier</li>
+ *   <li>title – artwork title</li>
+ *   <li>description – artwork description</li>
+ *   <li>category – artwork category</li>
+ *   <li>label – optional label or tag</li>
+ *   <li>price – artwork price</li>
+ *   <li>imgUrl – public image URL</li>
+ * </ul>
+ * </p>
+ */
 public class ArtworkResponseDTO {
 
     private int id;

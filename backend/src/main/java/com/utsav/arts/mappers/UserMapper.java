@@ -4,8 +4,22 @@ import com.utsav.arts.dtos.userDTO.UserRequestDTO;
 import com.utsav.arts.dtos.userDTO.UserResponseDTO;
 import com.utsav.arts.models.User;
 
+/**
+ * Mapper class for User entity and DTOs.
+ *
+ * <p>Provides methods:
+ * <ul>
+ *   <li>UserRequestDTO → User entity</li>
+ *   <li>User entity → UserResponseDTO</li>
+ * </ul>
+ */
 public class UserMapper {
 
+    /**
+     * Converts a UserRequestDTO to a User entity.
+     * @param dto UserRequestDTO containing user input
+     * @return User entity
+     */
     public static User toEntity(UserRequestDTO dto) {
         User user = new User();
         user.setFirstName(dto.getFirstName());
@@ -17,6 +31,11 @@ public class UserMapper {
         return user;
     }
 
+    /**
+     * Converts a User entity to UserResponseDTO.
+     * @param user User entity
+     * @return UserResponseDTO with mapped fields
+     */
     public static UserResponseDTO toResponseDTO(User user) {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());

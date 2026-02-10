@@ -2,6 +2,20 @@ package com.utsav.arts.dtos.userDTO;
 
 import com.utsav.arts.models.Role;
 
+/**
+ * DTO returned when sending user information to clients.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>id – unique user ID</li>
+ *   <li>firstName – user's first name</li>
+ *   <li>lastName – user's last name</li>
+ *   <li>email – user's email address</li>
+ *   <li>phoneNo – user's phone number</li>
+ *   <li>address – user's address</li>
+ *   <li>role – user's role in the system</li>
+ * </ul>
+ */
 public class UserResponseDTO {
 
     private int id;

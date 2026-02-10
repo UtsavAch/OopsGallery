@@ -11,9 +11,15 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+/**
+ * Utility class for generating and validating JWT tokens.
+ *
+ * <p>Supports creating tokens, extracting email from tokens, and validating
+ * expiration and integrity of JWTs.
+ */
 @Component
 public class JwtUtils {
-    // Adding a logger to see errors in the console
+    // Logger to see errors in the console
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
     private final Key signingKey;
@@ -26,6 +32,12 @@ public class JwtUtils {
         );
     }
 
+    /**
+     * Generates a JWT token for the given email.
+     *
+     * @param email the email to include in the token subject
+     * @return the generated JWT token
+     */
     public String generateJwtToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
@@ -37,6 +49,12 @@ public class JwtUtils {
                 .compact();
     }
 
+    /**
+     * Extracts the email from a JWT token.
+     *
+     * @param token the JWT token
+     * @return the email stored in the token
+     */
     public String getEmailFromJwtToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(signingKey)
@@ -46,6 +64,12 @@ public class JwtUtils {
                 .getSubject();
     }
 
+    /**
+     * Validates the JWT token for integrity, expiration, and correctness.
+     *
+     * @param token the JWT token
+     * @return true if valid; false otherwise
+     */
     public boolean validateJwtToken(String token) {
         try {
             Jwts.parserBuilder()

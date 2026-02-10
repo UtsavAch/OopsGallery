@@ -14,6 +14,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller to manage shopping carts for users.
+ *
+ * <p>Supports creation, retrieval, and deletion of carts.
+ * Access is restricted to authenticated users with roles USER or OWNER.
+ *
+ * <p>Endpoints:
+ * <ul>
+ *     <li>POST /api/carts → Create a cart</li>
+ *     <li>GET /api/carts/{id} → Get cart by ID</li>
+ *     <li>GET /api/carts/user/{userId} → Get cart for a specific user</li>
+ *     <li>DELETE /api/carts/{id} → Delete cart by ID</li>
+ * </ul>
+ */
 @RestController
 @RequestMapping("/api/carts")
 @PreAuthorize("hasAnyRole('USER', 'OWNER')")
@@ -31,6 +45,13 @@ public class CartController {
     }
 
     // ---------------- CREATE CART ----------------
+    /**
+     * Creates a new cart for a user.
+     *
+     * @param requestDTO Contains the userId for which the cart is created
+     * @return Created CartResponseDTO with cart details
+     * @throws ResourceNotFoundException if the user does not exist
+     */
     @PostMapping
     @PreAuthorize("hasRole('OWNER') or #requestDTO.userId == authentication.principal.id")
     public ResponseEntity<CartResponseDTO> save(
@@ -49,6 +70,13 @@ public class CartController {
     }
 
     // ---------------- READ ----------------
+    /**
+     * Retrieves a cart by its ID.
+     *
+     * @param id Cart ID
+     * @return CartResponseDTO
+     * @throws ResourceNotFoundException if the cart does not exist
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<CartResponseDTO> findById(
@@ -60,6 +88,13 @@ public class CartController {
         return ResponseEntity.ok(CartMapper.toResponseDTO(cart));
     }
 
+    /**
+     * Retrieves a cart by the user ID.
+     *
+     * @param userId User ID
+     * @return CartResponseDTO for the specified user
+     * @throws ResourceNotFoundException if the cart does not exist
+     */
     @GetMapping("/user/{userId}")
     @PreAuthorize("hasRole('OWNER') or #userId == authentication.principal.id")
     public ResponseEntity<CartResponseDTO> findByUserId(
@@ -72,6 +107,12 @@ public class CartController {
     }
 
     // ---------------- DELETE ----------------
+    /**
+     * Deletes a cart by its ID.
+     *
+     * @param id Cart ID
+     * @return HTTP 204 No Content on success
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {

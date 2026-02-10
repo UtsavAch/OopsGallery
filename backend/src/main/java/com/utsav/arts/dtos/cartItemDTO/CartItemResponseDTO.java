@@ -1,5 +1,17 @@
 package com.utsav.arts.dtos.cartItemDTO;
 
+/**
+ * Data Transfer Object used to send cart item information back to clients.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>id – identifier of the cart item</li>
+ *   <li>cartId – ID of the cart containing this item</li>
+ *   <li>artworkId – ID of the artwork</li>
+ *   <li>quantity – quantity of the artwork in the cart</li>
+ * </ul>
+ * </p>
+ */
 public class CartItemResponseDTO {
 
     private int id;

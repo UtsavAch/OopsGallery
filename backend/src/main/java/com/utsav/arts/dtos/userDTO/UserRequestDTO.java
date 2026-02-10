@@ -1,11 +1,23 @@
 package com.utsav.arts.dtos.userDTO;
 
-import com.utsav.arts.models.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/**
+ * DTO for creating or updating a user.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>firstName – user's first name</li>
+ *   <li>lastName – user's last name</li>
+ *   <li>email – user's email address</li>
+ *   <li>phoneNo – user's phone number</li>
+ *   <li>password – user's password</li>
+ *   <li>address – user's address</li>
+ * </ul>
+ */
 public class UserRequestDTO {
 
     @NotBlank(message = "First name is required")

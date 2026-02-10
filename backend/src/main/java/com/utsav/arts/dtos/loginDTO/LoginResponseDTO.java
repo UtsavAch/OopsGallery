@@ -2,6 +2,18 @@ package com.utsav.arts.dtos.loginDTO;
 
 import com.utsav.arts.models.Role;
 
+/**
+ * Data Transfer Object used to send login response information to clients.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>token – JWT token for authentication</li>
+ *   <li>userId – ID of the logged-in user</li>
+ *   <li>email – email of the logged-in user</li>
+ *   <li>role – role of the logged-in user</li>
+ * </ul>
+ * </p>
+ */
 public class LoginResponseDTO {
     private String token;
     private int userId;

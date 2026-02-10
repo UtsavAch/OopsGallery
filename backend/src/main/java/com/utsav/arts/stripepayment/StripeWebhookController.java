@@ -2,7 +2,6 @@ package com.utsav.arts.stripepayment;
 
 import com.stripe.exception.EventDataObjectDeserializationException;
 import com.stripe.exception.SignatureVerificationException;
-import com.stripe.model.Charge;
 import com.stripe.model.Event;
 import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
@@ -21,6 +20,19 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Controller to handle Stripe webhook events.
+ *
+ * <p>Listens for Stripe events such as successful or failed payments and updates the
+ * local database accordingly. Ensures idempotency to prevent duplicate processing.
+ *
+ * <p>Endpoints:
+ * <ul>
+ *     <li>POST /api/stripe/webhook → Handle incoming Stripe webhook events</li>
+ * </ul>
+ *
+ * <p>Security: Webhook signature verification is performed using the configured secret key.
+ */
 @RestController
 @RequestMapping("/api/stripe")
 public class StripeWebhookController {
@@ -44,6 +56,19 @@ public class StripeWebhookController {
         this.userService = userService;
     }
 
+    /**
+     * Handles incoming Stripe webhook events.
+     *
+     * <p>Currently processes:
+     * <ul>
+     *     <li>{@code payment_intent.succeeded} → Marks payment as SUCCESS</li>
+     *     <li>{@code payment_intent.payment_failed} → Marks payment as FAILED</li>
+     * </ul>
+     *
+     * @param payload the raw JSON payload sent by Stripe
+     * @param sigHeader the Stripe-Signature header for verifying authenticity
+     * @return ResponseEntity with status and message indicating result of processing
+     */
     @PostMapping("/webhook")
     public ResponseEntity<String> handleStripeWebhook(
             @RequestBody String payload,
@@ -104,6 +129,14 @@ public class StripeWebhookController {
         }
     }
 
+    /**
+     * Processes a successful PaymentIntent.
+     *
+     * <p>Validates metadata, checks for idempotency, and saves payment record
+     * in the database with status SUCCESS.
+     *
+     * @param intent the Stripe PaymentIntent object representing a successful payment
+     */
     private void handleSuccess(PaymentIntent intent) {
         logger.info("Processing payment_intent.succeeded for {}", intent.getId());
 
@@ -156,6 +189,13 @@ public class StripeWebhookController {
         logger.info("Payment succeeded and saved for order {}", orderId);
     }
 
+    /**
+     * Processes a failed PaymentIntent.
+     *
+     * <p>Updates the corresponding payment record in the database with status FAILED.
+     *
+     * @param intent the Stripe PaymentIntent object representing a failed payment
+     */
     private void handleFailure(PaymentIntent intent) {
         paymentService.findByTransactionId(intent.getId())
                 .ifPresent(payment -> {

@@ -2,6 +2,20 @@ package com.utsav.arts.dtos.ordersDTO;
 
 import java.math.BigDecimal;
 
+/**
+ * Data Transfer Object representing a single item within an order.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>id – unique identifier of the order item</li>
+ *   <li>artworkId – ID of the purchased artwork</li>
+ *   <li>artworkTitle – title of the artwork</li>
+ *   <li>artworkImgUrl – image URL of the artwork</li>
+ *   <li>quantity – quantity purchased</li>
+ *   <li>priceAtPurchase – price of the artwork at the time of purchase</li>
+ * </ul>
+ * </p>
+ */
 public class OrderItemResponseDTO {
     private int id;
     private int artworkId;

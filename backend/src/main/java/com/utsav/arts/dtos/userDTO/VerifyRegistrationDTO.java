@@ -1,5 +1,14 @@
 package com.utsav.arts.dtos.userDTO;
 
+/**
+ * DTO used when verifying a user's registration with a code.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>email – email of the user</li>
+ *   <li>code – verification code sent to the user</li>
+ * </ul>
+ */
 public class VerifyRegistrationDTO {
     private String email;
     private String code;

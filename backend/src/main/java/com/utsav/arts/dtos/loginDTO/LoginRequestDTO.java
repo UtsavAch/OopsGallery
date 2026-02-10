@@ -3,6 +3,16 @@ package com.utsav.arts.dtos.loginDTO;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * Data Transfer Object used to capture login requests.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>email – user's email address</li>
+ *   <li>password – user's password</li>
+ * </ul>
+ * </p>
+ */
 public class LoginRequestDTO {
 
     @NotBlank(message = "Email is required")

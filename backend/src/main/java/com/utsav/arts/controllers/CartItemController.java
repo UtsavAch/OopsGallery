@@ -19,6 +19,24 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for managing cart items.
+ *
+ * <p>Supports adding, updating, retrieving, deleting, and modifying quantities of items in a cart.
+ * Access is restricted to authenticated users with roles USER or OWNER.
+ *
+ * <p>Endpoints:
+ * <ul>
+ *     <li>POST /api/cart-items → Add item to cart</li>
+ *     <li>PUT /api/cart-items/{id} → Update cart item quantity</li>
+ *     <li>GET /api/cart-items/{id} → Get cart item by ID</li>
+ *     <li>GET /api/cart-items/cart/{cartId} → Get all items for a cart</li>
+ *     <li>DELETE /api/cart-items/{id} → Delete cart item by ID</li>
+ *     <li>DELETE /api/cart-items/cart/{cartId} → Delete all items in a cart</li>
+ *     <li>PATCH /api/cart-items/{id}/increase → Increase item quantity by 1</li>
+ *     <li>PATCH /api/cart-items/{id}/decrease → Decrease item quantity by 1</li>
+ * </ul>
+ */
 @RestController
 @RequestMapping("/api/cart-items")
 @PreAuthorize("hasAnyRole('USER', 'OWNER')")
@@ -37,6 +55,13 @@ public class CartItemController {
     }
 
     // ---------------- ADD TO CART ----------------
+    /**
+     * Adds a new item to a cart.
+     *
+     * @param requestDTO CartItemRequestDTO containing cartId, artworkId, quantity
+     * @return Created CartItemResponseDTO
+     * @throws ResourceNotFoundException if cart or artwork does not exist
+     */
     @PostMapping
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#requestDTO.cartId, authentication.principal.id)")
     public ResponseEntity<CartItemResponseDTO> save(@Valid @RequestBody CartItemRequestDTO requestDTO) {
@@ -53,6 +78,14 @@ public class CartItemController {
     }
 
     // ---------------- UPDATE QUANTITY ----------------
+    /**
+     * Updates an existing cart item (quantity or artwork) by ID.
+     *
+     * @param id Cart item ID
+     * @param requestDTO CartItemRequestDTO with updated info
+     * @return Updated CartItemResponseDTO
+     * @throws ResourceNotFoundException if cart or artwork does not exist
+     */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<CartItemResponseDTO> update(@PathVariable int id, @Valid @RequestBody CartItemRequestDTO requestDTO) {
@@ -75,6 +108,9 @@ public class CartItemController {
     }
 
     // ---------------- READ ----------------
+    /**
+     * Retrieves a cart item by ID.
+     */
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<CartItemResponseDTO> findById(@PathVariable int id) {
@@ -85,6 +121,9 @@ public class CartItemController {
         return ResponseEntity.ok(CartItemMapper.toResponseDTO(item));
     }
 
+    /**
+     * Retrieves all items for a given cart (id).
+     */
     @GetMapping("/cart/{cartId}")
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#cartId, authentication.principal.id)")
     public ResponseEntity<List<CartItemResponseDTO>> findByCartId(@PathVariable int cartId) {
@@ -101,6 +140,9 @@ public class CartItemController {
     }
 
     // ---------------- DELETE ----------------
+    /**
+     * Deletes a cart item by ID.
+     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<Void> deleteById(@PathVariable int id) {
@@ -108,6 +150,9 @@ public class CartItemController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Deletes all items in a cart.
+     */
     @DeleteMapping("/cart/{cartId}")
     @PreAuthorize("hasRole('OWNER') or @cartService.isOwner(#cartId, authentication.principal.id)")
     public ResponseEntity<Void> deleteByCartId(@PathVariable int cartId) {
@@ -115,6 +160,9 @@ public class CartItemController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Decreases the quantity of a cart item by 1.
+     */
     @PatchMapping("/{id}/decrease")
     @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<Void> decreaseQuantity(@PathVariable int id) {
@@ -122,6 +170,9 @@ public class CartItemController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Increases the quantity of a cart item by 1.
+     */
     @PatchMapping("/{id}/increase")
     @PreAuthorize("hasRole('OWNER') or @cartItemService.isOwner(#id, authentication.principal.id)")
     public ResponseEntity<Void> increaseQuantity(@PathVariable int id) {

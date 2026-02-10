@@ -3,6 +3,23 @@ package com.utsav.arts.dtos.paymentDTO;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object representing a payment returned to the client.
+ *
+ * <p><strong>Fields:</strong>
+ * <ul>
+ *   <li>id – unique identifier of the payment</li>
+ *   <li>orderId – ID of the associated order</li>
+ *   <li>userId – ID of the user who made the payment</li>
+ *   <li>amount – amount paid</li>
+ *   <li>currency – currency of the payment</li>
+ *   <li>method – payment method used (e.g., Stripe, PayPal)</li>
+ *   <li>status – status of the payment (mapped from PaymentStatus enum)</li>
+ *   <li>transactionId – unique transaction identifier from the payment gateway</li>
+ *   <li>createdAt – timestamp when the payment was created</li>
+ * </ul>
+ * </p>
+ */
 public class PaymentResponseDTO {
 
     private int id;

@@ -34,7 +34,6 @@ public class JwtProperties {
     @Min(60000)
     private long expirationMs; // maps to "jwt.expiration-ms"
 
-    // Getters and Setters are REQUIRED for this to work
     public String getSecret() { return secret; }
     public void setSecret(String secret) { this.secret = secret; }
 
