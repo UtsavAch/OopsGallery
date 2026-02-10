@@ -9,7 +9,7 @@ An intuitive online art gallery where users can **browse, order, and purchase ar
 - **Backend:** Java, SpringBoot
 - **Database & Storage:** PostgreSQL, Supabase
 - **Authentication & Security:** JWT
-- **Email Service:** SendGrid (for user verification and notifications)
+- **Email Service:** SendGrid (for user verification)
 - **Payments:** Stripe
 - **Containerization:** Docker
 
@@ -29,32 +29,32 @@ DB -> Repositories -> Services -> DTOs -> Controllers & Routes
 
 #### Database Configuration
 
-DB_URL=your_db_url
-DB_USER=postgres
-DB_PASSWORD=your_db_password
+- `DB_URL`=your_db_url
+- `DB_USER`=your_db_user
+- `DB_PASSWORD`=your_db_password
 
 #### Security & JWT
 
-JWT_SECRET=your_jwt_secret_key_min_32_chars
-JWT_EXPIRATION_MS=86400000
+- `JWT_SECRET`=your_jwt_secret_key_min_32_chars
+- `JWT_EXPIRATION_MS`=time in ms
 
 #### Email Service (SendGrid)
 
-EMAIL_HOST=smtp.sendgrid.net
-EMAIL_PORT=587
-EMAIL_FROM=your_verified_email@domain.com
-SENDGRID_API_KEY=SG.your_api_key
+- `EMAIL_HOST`=smtp.sendgrid.net
+- `EMAIL_PORT`=587
+- `EMAIL_FROM`=your_verified_email@domain.com
+- `SENDGRID_API_KEY`=SG.your_api_key
 
 #### Payment Gateway (Stripe)
 
-STRIPE_API_KEY=sk_test_your_key
-STRIPE_WEBHOOK_SECRET=whsec_your_secret
+- `STRIPE_API_KEY`=sk_test_your_key
+- `STRIPE_WEBHOOK_SECRET`=whsec_your_secret
 
 #### Cloud Storage (Supabase)
 
-SUPABASE_STORAGE_URL=https://your-project.supabase.co
-SUPABASE_STORAGE_KEY=your_service_role_key
-SUPABASE_STORAGE_BUCKET=artworks
+- `SUPABASE_STORAGE_URL`=https://your-project.supabase.co
+- `SUPABASE_STORAGE_KEY`=your_service_role_key
+- `SUPABASE_STORAGE_BUCKET`=artworks (or the name of the bucket in your supabase storage)
 
 ## Getting Started
 
