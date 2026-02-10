@@ -2,7 +2,7 @@
 
 ## Concept
 
-An intuitive online art gallery where users can **browse, order, and purchase artworks** seamlessly. The platform ensures a **secure checkout process** while providing an enjoyable user experience for art lovers and collectors alike.
+An online art gallery where you can **browse, order, and purchase artworks**. And the **owner** can manage the contents (artworks, orders, etc.)
 
 ## Tools & Technologies
 
