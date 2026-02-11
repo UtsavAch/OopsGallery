@@ -62,11 +62,19 @@ DB -> Repositories -> Services -> DTOs -> Controllers & Routes
 
 #### Install dependencies
 
-./mvn clean install
+`./mvn clean install`
 
 #### Run application
 
-./mvn spring-boot:run
+`./mvn spring-boot:run`
+(Note: Do not forget the environment variables)
+
+#### With Docker
+
+Create .env file inside backend folder and put all the environment variables.
+
+Run the command (Note: You should be inside backend folder)
+`docker compose up --build`
 
 ## API ENDPOINTS
 
