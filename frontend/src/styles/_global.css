@@ -1,0 +1,144 @@
+@import "./_variables.css";
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100vh;
+  scroll-behavior: smooth;
+  text-align: center;
+}
+
+/* Body: Dynamic Theme Switching */
+body {
+  font-family: var(--font-display);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+
+  /* Default to Light Mode values */
+  background-color: var(--color-background-light);
+  color: var(--color-text-main-light);
+  /* Default Mobile Spacing (Find at the bottom, the implementation of other screen sizes) */
+  padding: var(--spacing-md);
+}
+
+/* Dark Mode */
+html.dark body {
+  background-color: var(--color-background-dark);
+  color: var(--color-text-main-dark);
+}
+
+/* Default typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-bottom: var(--spacing-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  color: inherit;
+}
+
+h1 {
+  font-size: var(--font-size-display-sm);
+}
+h2 {
+  font-size: var(--font-size-h1);
+}
+h3 {
+  font-size: var(--font-size-h2);
+}
+
+p {
+  margin-bottom: var(--spacing-md);
+}
+
+/* 4. Global Elements */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+button {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition:
+    transform 0.1s ease,
+    filter 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Inputs & Forms*/
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  width: 100%;
+  border: 1px solid transparent;
+}
+
+html.dark input {
+  background-color: var(--color-input-dark);
+  color: white;
+}
+
+/* Custom Scrollbar for Dark Mode */
+html.dark ::-webkit-scrollbar {
+  width: 6px;
+}
+html.dark ::-webkit-scrollbar-track {
+  background: var(--color-background-dark);
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-surface-dark);
+  border-radius: var(--border-radius-full);
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-card-dark);
+}
+
+/* Medium Screen (Tablets) */
+@media (min-width: 768px) {
+  :root {
+    --container-padding: var(--spacing-xl);
+  }
+
+  body {
+    padding: var(--spacing-xl) var(--container-padding);
+    font-size: 1.0625rem;
+  }
+}
+
+/* Large Screen (Desktops) */
+@media (min-width: 1024px) {
+  .main-container {
+    max-width: var(--screen-xl);
+    margin: 0 auto;
+  }
+}

@@ -7,6 +7,7 @@ An online art gallery where you can **browse, order, and purchase artworks**. An
 ## Tools & Technologies
 
 - **Backend:** Java, SpringBoot
+- **Frontend:** React.js
 - **Database & Storage:** PostgreSQL, Supabase
 - **Authentication & Security:** JWT
 - **Email Service:** SendGrid (for user verification)
@@ -153,3 +154,10 @@ Run the command (Note: You should be inside backend folder)
 **Base Path:** `/api/meta`
 
 - `GET /art-categories` Public — Retrieve list of all valid art categories.
+
+## FRONTEND
+
+### Style
+
+To make the design consistent across the website style variables and global styles are used.
+Check `/frontend/src/styles`

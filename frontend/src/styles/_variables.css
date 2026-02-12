@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
+
+:root {
+  /* --- MAIN COLORS --- */
+  --color-primary: #3617cf;
+  --color-background-light: #f6f6f8;
+  --color-background-dark: #141121;
+
+  /* --- SURFACES AND CARDS --- */
+  --color-surface-dark: #1e1b2e; /* Used in: Register, Feed */
+  --color-surface-dark-alt-1: #1c192e; /* Used in: Cart */
+  --color-surface-dark-alt-2: #1e1a32; /* Used in: Checkout */
+
+  --color-card-light: #ffffff;
+  --color-card-dark: #2a2447; /* Used in: Dashboard */
+  --color-input-dark: #2a2447; /* Used in: Register, Login (Matches card-dark) */
+
+  /* --- TEXT COLORS --- */
+  --color-text-main-light: #111418;
+  --color-text-main-dark: #ffffff;
+  --color-text-secondary-light: #637588;
+  --color-text-secondary-dark: #9c93c8;
+
+  /* --- SEMANTIC COLORS --- */
+  --color-success: #0bda6c; /* Used in: Dashboard Stats, etc */
+  --color-error: #ff4d4f; /* Used in: Errors, etc */
+  --color-border-highlight: #3c3465; /* Used in: Checkout (Shipping Border), etc */
+  --color-gradient-start: #2a2640; /* Used in: Checkout (Credit Card Gradient), etc. */
+
+  /* --- TYPOGRAPHY --- */
+  --font-display: "Manrope", sans-serif;
+
+  /* --- RADIUS --- */
+  --border-radius-default: 0.25rem;
+  --border-radius-lg: 0.5rem;
+  --border-radius-xl: 0.75rem;
+  --border-radius-2xl: 1rem;
+  --border-radius-full: 9999px;
+
+  /* --- SHADOWS --- */
+  --box-shadow-soft:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --box-shadow-glow: 0 0 20px rgba(54, 23, 207, 0.3);
+  --box-shadow-glow-alt: 0 0 15px rgba(54, 23, 207, 0.3);
+
+  /* -------------------- FONT SIZES --------------------*/
+  /* --- Display & Hero Titles --- */
+  --font-size-display-lg: 2.25rem;
+  --font-size-display-md: 2rem; /* (custom) */
+  --font-size-display-sm: 1.875rem;
+
+  /* --- Headings --- */
+  --font-size-h1: 1.5rem;
+  --font-size-h2: 1.25rem;
+
+  /* --- Subheadings & Interactive --- */
+  /* Cart Buttons, Card Titles, Section Headers */
+  --font-size-lg: 1.125rem;
+  --font-size-base: 1rem;
+
+  /* --- Secondary Text --- */
+  /* Artist Names, Input Labels, Filters, Price Tags */
+  --font-size-sm: 0.875rem;
+
+  /* --- Metadata & Captions --- */
+  /* Footer Notes, Status Badges, Security Notes */
+  --font-size-xs: 0.75rem;
+
+  /* --- Micro Text --- */
+  /* Dashboard Nav Labels, Feed "Spotlight" Tags */
+  --font-size-xxs: 0.625rem;
+
+  /*--------------- FONT WEIGHTS ------------- */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 800;
+
+  /*--------------- SPACING SCALES ------------- */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+
+  /* Layout Spacing */
+  --container-padding: var(--spacing-md);
+  --section-gap: var(--spacing-2xl);
+  --card-padding: var(--spacing-lg);
+  --input-gap: var(--spacing-sm);
+
+  /*--------------- BREAKPOINTS ------------- */
+  --screen-sm: 640px; /* Mobile / Tablets */
+  --screen-md: 768px; /* Large Tablets */
+  --screen-lg: 1024px; /* Laptops / Desktops */
+  --screen-xl: 1280px; /* Large Desktops */
+}
