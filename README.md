@@ -106,6 +106,7 @@ Run the command (Note: You should be inside backend folder)
 **Base Path:** `/api/artworks`
 
 - `POST /` OWNER — Upload new artwork with image and metadata.
+- `PUT /{id}` OWNER - Update an artwork.
 - `GET /{id}` Public — Get detailed information for a specific piece.
 - `GET /` Public — Retrieve all available artworks.
 - `GET /category/{category}` Public — Filter artworks by category.
@@ -120,19 +121,23 @@ Run the command (Note: You should be inside backend folder)
 - `GET /api/carts/user/{userId}` Self / OWNER — View cart contents by user ID.
 - `DELETE /api/carts/{id}` Self / OWNER — Delete an entire cart.
 - `POST /api/cart-items` Self / OWNER — Add an artwork to the cart.
+- `PUT /api/cart-items/{id}` Self / OWNER - Update cart item quantity.
+- `GET /api/cart-items/{id}` Self / OWNER - Get cart item by ID.
 - `GET /api/cart-items/cart/{id}` Self / OWNER — View all items within a specific cart.
 - `PATCH /api/cart-items/{id}/increase` Self / OWNER — Increase item quantity.
 - `PATCH /api/cart-items/{id}/decrease` Self / OWNER — Decrease item quantity.
 - `DELETE /api/cart-items/{id}` Self / OWNER — Remove a specific item from the cart.
+- `DELETE /api/cart-items/cart/{cartId}`Self / OWNER - Delete all items in a cart.
 
 ### Orders
 
 **Base Path:** `/api/orders`
 
-- `POST /` Authenticated — Place a new order from current cart.
+- `POST /` Self — Place a new order from current cart.
 - `GET /{id}` Self / OWNER — Retrieve order details.
 - `GET /user/{userId}` Self / OWNER — List all orders for a specific user.
 - `GET /` OWNER — List all orders in the system.
+- `GET /api/orders/status/{status}`OWNER - Get orders by status.
 - `POST /{id}/confirm` OWNER — Mark order as confirmed.
 - `POST /{id}/ship` OWNER — Mark order as shipped.
 - `POST /{id}/deliver` OWNER — Mark order as delivered.
@@ -143,10 +148,14 @@ Run the command (Note: You should be inside backend folder)
 
 **Base Path:** `/api/payments | /api/stripe`
 
-- `POST /api/payments` Self / OWNER — Initiate a Stripe Payment Intent.
-- `GET /api/payments/order/{id}` Self / OWNER — Fetch payment status for an order.
-- `GET /api/payments/payment-statuses` OWNER — List all possible payment statuses.
-- `DELETE /api/payments/{id}` OWNER — Delete a payment record.
+- `GET /api/payments` OWNER - Get all payments.
+- `GET /api/payments/{id}` Self / OWNER - Get payment by ID.
+- `GET /api/payments/user/{userId}` Self / OWNER - Get payments for a user.
+- `GET /api/payments/order/{orderId}` Self / OWNER - Get payments for an order.
+- `GET /api/payments/status/{status}` OWNER - Get payments by status.
+- `POST /api/payments/intent` Self / OWNER - Create a Stripe PaymentIntent.
+- `DELETE /api/payments/{id}` OWNER - Delete payment.
+- `GET /api/payments/payment-statuses` OWNER - Get all payment status options.
 - `POST /api/stripe/webhook` Public (Stripe) — Handle Stripe payment success/failure events.
 
 ### Metadata
@@ -156,6 +165,8 @@ Run the command (Note: You should be inside backend folder)
 - `GET /art-categories` Public — Retrieve list of all valid art categories.
 
 ## FRONTEND
+
+(ONGOING ...)
 
 ### Style
 
