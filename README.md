@@ -172,3 +172,8 @@ Run the command (Note: You should be inside backend folder)
 
 To make the design consistent across the website style variables and global styles are used.
 Check `/frontend/src/styles`
+
+### API Handling
+
+Api in the frontend is handled inside `/frontend/src/services`
+Implemented types and proper documentation

@@ -5,6 +5,9 @@ export const authService = {
   /**
    * Sends credentials to the backend.
    * On success, returns the JWT and user basic info.
+   *
+   * @see {@link LoginRequest}
+   * @see {@link LoginResponse}
    */
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await api.post<LoginResponse>("/auth/login", credentials);
@@ -28,6 +31,8 @@ export const authService = {
 
   /**
    * Helper to check if a user is currently stored in local storage
+   *
+   * @see {@link LoginResponse}
    */
   getCurrentUser(): LoginResponse | null {
     const userStr = localStorage.getItem("user");

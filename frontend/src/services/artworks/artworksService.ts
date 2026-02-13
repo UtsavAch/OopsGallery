@@ -6,19 +6,32 @@ import type {
 } from "./artworks.types";
 
 export const artworksService = {
-  // 1. GET ALL ARTWORKS
+  /**
+   * Retrieves all artworks.
+   *
+   * @see {@link ArtworkResponse}
+   */
   async findAll(): Promise<ArtworkResponse[]> {
     const response = await api.get<ArtworkResponse[]>("/artworks");
     return response.data;
   },
 
-  // 2. GET BY ID
+  /**
+   * Retrieves artwork by its ID.
+   *
+   * @see {@link ArtworkResponse}
+   */
   async findById(id: number): Promise<ArtworkResponse> {
     const response = await api.get<ArtworkResponse>(`/artworks/${id}`);
     return response.data;
   },
 
-  // 3. GET BY CATEGORY
+  /**
+   * Retrieves artworks by category.
+   *
+   * @see {@link ArtCategory}
+   * @see {@link ArtworkResponse}
+   */
   async findByCategory(
     category: string | ArtCategory,
   ): Promise<ArtworkResponse[]> {
@@ -28,7 +41,13 @@ export const artworksService = {
     return response.data;
   },
 
-  // 4. CREATE ARTWORK (Multipart: JSON + Image)
+  /**
+   * Creates a new artwork with optional image upload.
+   * Takes(Multipart: JSON + Image)
+   *
+   * @see {@link ArtworkRequest}
+   * @see {@link ArtworkResponse}
+   */
   async save(data: ArtworkRequest, image: File): Promise<ArtworkResponse> {
     const formData = new FormData();
 
@@ -47,7 +66,12 @@ export const artworksService = {
     return response.data;
   },
 
-  // 5. UPDATE ARTWORK (Image is optional)
+  /**
+   * Updates an existing artwork by ID. Image upload is optional.
+   *
+   * @see {@link ArtworkRequest}
+   * @see {@link ArtworkResponse}
+   */
   async update(
     id: number,
     data: ArtworkRequest,
@@ -74,12 +98,16 @@ export const artworksService = {
     return response.data;
   },
 
-  // 6. DELETE ARTWORK
+  /**
+   * Deletes artwork by its ID.
+   */
   async deleteById(id: number): Promise<void> {
     await api.delete(`/artworks/${id}`);
   },
 
-  // 7. METADATA: Get Categories
+  /**
+   * Retrieves all available art categories.
+   */
   async getCategories(): Promise<string[]> {
     const response = await api.get<string[]>("/meta/art-categories");
     return response.data;

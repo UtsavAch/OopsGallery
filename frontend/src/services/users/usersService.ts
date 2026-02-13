@@ -8,25 +8,41 @@ import type {
 } from "./users.types";
 
 export const usersService = {
-  // 1. Create a user directly (OWNER ONLY)
+  /**
+   * Creates a new user directly. Only accessible by OWNER.
+   * This bypasses email verification.
+   *
+   * @see {@link UserRequest}
+   * @see {@link UserResponse}
+   */
   async save(data: UserRequest): Promise<UserResponse> {
     const response = await api.post<UserResponse>("/users", data);
     return response.data;
   },
 
-  // 2. Public Registration
+  /**
+   * Registers a new user. Sends a verification email.
+   *
+   * @see {@link UserRequest}
+   */
   async register(data: UserRequest): Promise<string> {
     const response = await api.post<string>("/users/register", data);
     return response.data;
   },
 
-  // 3. Verify Account
+  /**
+   * Verifies a user account using the email and verification code.
+   *
+   * @see {@link VerifyRegistrationRequest}
+   */
   async verifyUser(data: VerifyRegistrationRequest): Promise<string> {
     const response = await api.post<string>("/users/verify", data);
     return response.data;
   },
 
-  // 4. Resend Verification Code
+  /**
+   * Resends a verification code to the user's email.
+   */
   async resendVerification(email: string): Promise<string> {
     const payload: ResendVerificationRequest = { email };
     const response = await api.post<string>(
@@ -36,13 +52,23 @@ export const usersService = {
     return response.data;
   },
 
-  // 5. Update User (OWNER or Self)
+  /**
+   * Updates a user's information. Accessible by OWNER or the user themselves.
+   *
+   * @see {@link VerifyRegistrationRequest}
+   * @see {@link VerifyRegistrationRequest}
+   */
   async update(id: number, data: UserRequest): Promise<UserResponse> {
     const response = await api.put<UserResponse>(`/users/${id}`, data);
     return response.data;
   },
 
-  // 6. Update Role (OWNER ONLY)
+  /**
+   * Updates a user's role. Only accessible by OWNER.
+   *
+   * @see {@link UserRole}
+   * @see {@link UserResponse}
+   */
   async updateRole(id: number, role: UserRole): Promise<UserResponse> {
     const response = await api.patch<UserResponse>(`/users/${id}/role`, null, {
       params: { role }, // Passes role as a Query Parameter like @RequestParam in Java
@@ -50,30 +76,46 @@ export const usersService = {
     return response.data;
   },
 
-  // 7. Get All Users (OWNER ONLY)
+  /**
+   * Retrieves all users. OWNER only.
+   *
+   * @see {@link UserResponse}
+   */
   async findAll(): Promise<UserResponse[]> {
     const response = await api.get<UserResponse[]>("/users");
     return response.data;
   },
 
-  // 8. Find by ID (OWNER or Self)
+  /**
+   * Retrieves a user by ID. Accessible by OWNER or the user themselves.
+   *
+   * @see {@link UserResponse}
+   */
   async findById(id: number): Promise<UserResponse> {
     const response = await api.get<UserResponse>(`/users/${id}`);
     return response.data;
   },
 
-  // 9. Find by Email (OWNER or Self)
+  /**
+   * Retrieves a user by email. Accessible by OWNER or the user themselves.
+   *
+   * @see {@link UserResponse}
+   */
   async findByEmail(email: string): Promise<UserResponse> {
     const response = await api.get<UserResponse>(`/users/email/${email}`);
     return response.data;
   },
 
-  // 10. Delete User (OWNER or Self)
+  /**
+   * Deletes a user by ID. Accessible by OWNER or the user themselves.
+   */
   async deleteById(id: number): Promise<void> {
     await api.delete(`/users/${id}`);
   },
 
-  // 11. Check if Email Exists
+  /**
+   * Checks if an email is already registered in the system.
+   */
   async existsByEmail(email: string): Promise<boolean> {
     const response = await api.get<boolean>(`/users/exists/${email}`);
     return response.data;
