@@ -57,6 +57,10 @@ DB -> Repositories -> Services -> DTOs -> Controllers & Routes
 - `SUPABASE_STORAGE_KEY`=your_service_role_key
 - `SUPABASE_STORAGE_BUCKET`=artworks (or the name of the bucket in your supabase storage)
 
+### CORS
+
+- `CORS_ALLOWED_ORIGINS`=frontend_domain_name
+
 ## Getting Started
 
 ### Inside backend folder
@@ -177,3 +181,10 @@ Check `/frontend/src/styles`
 
 Api in the frontend is handled inside `/frontend/src/services`
 Implemented types and proper documentation
+
+### Authentication, Registration and Login
+
+Visit these files:-
+
+- `frontend/services/auth`
+- `frontend/src/contexts`
