@@ -1,13 +1,13 @@
 import React from "react";
 
-const CheckoutPage: React.FC = () => {
+const OrdersPage: React.FC = () => {
   return (
     <div>
       <header>
-        <h1>Checkout</h1>
+        <h1>Orders</h1>
       </header>
     </div>
   );
 };
 
-export default CheckoutPage;
+export default OrdersPage;

@@ -1,46 +1,39 @@
 import { useAuth } from "../../contexts/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
 
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
-    <nav className="flex items-center justify-between p-4 bg-gray-800 text-white">
-      {/* Logo */}
-      <div className="text-xl font-bold">ArtStore</div>
+    <nav style={{ display: "flex", justifyContent: "space-between" }}>
+      <div>
+        <a href="/">ArtStore</a>
+      </div>
 
-      {/* Middle message when not logged in */}
-      {!isAuthenticated && (
-        <div className="hidden md:block text-center flex-1 text-gray-300">
-          Login or register to purchase
-        </div>
-      )}
+      {!isAuthenticated && <div>Login or register to purchase</div>}
 
-      {/* Menu items */}
-      <div className="flex items-center gap-4">
+      <div>
         {isAuthenticated ? (
-          <>
-            <a href="/orders" className="hover:underline">
-              Orders
-            </a>
-            <a href="/cart" className="hover:underline">
-              Cart
-            </a>
-            <a href="/profile" className="hover:underline">
-              Profile
-            </a>
-            <button onClick={logout} className="hover:underline">
-              Logout
-            </button>
-          </>
+          <div style={{ display: "flex", gap: "var(--spacing-xs)" }}>
+            <a href="/">Shop</a>
+            <a href="/orders">Orders</a>
+            <a href="/cart">Cart</a>
+            <a href="/profile">Profile</a>
+            {user?.role === "ROLE_OWNER" && <a href="/dashboard">Dashboard</a>}
+            <button onClick={handleLogout}>Logout</button>
+          </div>
         ) : (
-          <>
-            <a href="/login" className="hover:underline">
-              Login
-            </a>
-            <a href="/register" className="hover:underline">
-              Register
-            </a>
-          </>
+          <div style={{ display: "flex", gap: "var(--spacing-xs)" }}>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+          </div>
         )}
       </div>
     </nav>
