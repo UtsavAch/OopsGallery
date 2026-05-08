@@ -4,29 +4,24 @@
 :root {
   /* --- MAIN COLORS --- */
   --color-primary: #3617cf;
-  --color-background-light: #f6f6f8;
-  --color-background-dark: #141121;
+  --color-background: #141121;
 
   /* --- SURFACES AND CARDS --- */
-  --color-surface-dark: #1e1b2e; /* Used in: Register, Feed */
-  --color-surface-dark-alt-1: #1c192e; /* Used in: Cart */
-  --color-surface-dark-alt-2: #1e1a32; /* Used in: Checkout */
-
-  --color-card-light: #ffffff;
-  --color-card-dark: #2a2447; /* Used in: Dashboard */
-  --color-input-dark: #2a2447; /* Used in: Register, Login (Matches card-dark) */
+  --color-surface: #1e1b2e;
+  --color-surface-alt-1: #1c192e;
+  --color-surface-alt-2: #1e1a32;
+  --color-card: #2a2447;
+  --color-input: #2a2447;
 
   /* --- TEXT COLORS --- */
-  --color-text-main-light: #111418;
-  --color-text-main-dark: #ffffff;
-  --color-text-secondary-light: #637588;
-  --color-text-secondary-dark: #9c93c8;
+  --color-text-main: #ffffff;
+  --color-text-secondary: #9c93c8;
 
   /* --- SEMANTIC COLORS --- */
-  --color-success: #0bda6c; /* Used in: Dashboard Stats, etc */
-  --color-error: #ff4d4f; /* Used in: Errors, etc */
-  --color-border-highlight: #3c3465; /* Used in: Checkout (Shipping Border), etc */
-  --color-gradient-start: #2a2640; /* Used in: Checkout (Credit Card Gradient), etc. */
+  --color-success: #0bda6c;
+  --color-error: #ff4d4f;
+  --color-border-highlight: #3c3465;
+  --color-gradient-start: #2a2640;
 
   /* --- TYPOGRAPHY --- */
   --font-display: "Manrope", sans-serif;
@@ -47,7 +42,7 @@
   /* -------------------- FONT SIZES --------------------*/
   /* --- Display & Hero Titles --- */
   --font-size-display-lg: 2.25rem;
-  --font-size-display-md: 2rem; /* (custom) */
+  --font-size-display-md: 2rem;
   --font-size-display-sm: 1.875rem;
 
   /* --- Headings --- */
@@ -55,20 +50,16 @@
   --font-size-h2: 1.25rem;
 
   /* --- Subheadings & Interactive --- */
-  /* Cart Buttons, Card Titles, Section Headers */
   --font-size-lg: 1.125rem;
   --font-size-base: 1rem;
 
   /* --- Secondary Text --- */
-  /* Artist Names, Input Labels, Filters, Price Tags */
   --font-size-sm: 0.875rem;
 
   /* --- Metadata & Captions --- */
-  /* Footer Notes, Status Badges, Security Notes */
   --font-size-xs: 0.75rem;
 
   /* --- Micro Text --- */
-  /* Dashboard Nav Labels, Feed "Spotlight" Tags */
   --font-size-xxs: 0.625rem;
 
   /*--------------- FONT WEIGHTS ------------- */
@@ -94,8 +85,8 @@
   --input-gap: var(--spacing-sm);
 
   /*--------------- BREAKPOINTS ------------- */
-  --screen-sm: 640px; /* Mobile / Tablets */
-  --screen-md: 768px; /* Large Tablets */
-  --screen-lg: 1024px; /* Laptops / Desktops */
-  --screen-xl: 1280px; /* Large Desktops */
+  --screen-sm: 640px;
+  --screen-md: 768px;
+  --screen-lg: 1024px;
+  --screen-xl: 1280px;
 }

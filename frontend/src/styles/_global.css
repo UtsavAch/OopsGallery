@@ -15,7 +15,7 @@ body {
   text-align: center;
 }
 
-/* Body: Dynamic Theme Switching */
+/* Body: Dark Mode */
 body {
   font-family: var(--font-display);
   font-size: var(--font-size-base);
@@ -23,18 +23,9 @@ body {
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
-
-  /* Default to Light Mode values */
-  background-color: var(--color-background-light);
-  color: var(--color-text-main-light);
-  /* Default Mobile Spacing (Find at the bottom, the implementation of other screen sizes) */
+  background-color: var(--color-background);
+  color: var(--color-text-main);
   padding: var(--spacing-md);
-}
-
-/* Dark Mode */
-html.dark body {
-  background-color: var(--color-background-dark);
-  color: var(--color-text-main-dark);
 }
 
 /* Default typography */
@@ -64,7 +55,7 @@ p {
   margin-bottom: var(--spacing-md);
 }
 
-/* 4. Global Elements */
+/* Global Elements */
 a {
   color: var(--color-primary);
   text-decoration: none;
@@ -101,26 +92,8 @@ textarea {
   padding: var(--spacing-sm) var(--spacing-md);
   width: 100%;
   border: 1px solid transparent;
-}
-
-html.dark input {
-  background-color: var(--color-input-dark);
-  color: white;
-}
-
-/* Custom Scrollbar for Dark Mode */
-html.dark ::-webkit-scrollbar {
-  width: 6px;
-}
-html.dark ::-webkit-scrollbar-track {
-  background: var(--color-background-dark);
-}
-html.dark ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-dark);
-  border-radius: var(--border-radius-full);
-}
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-card-dark);
+  background-color: var(--color-input);
+  color: var(--color-text-main);
 }
 
 /* Medium Screen (Tablets) */

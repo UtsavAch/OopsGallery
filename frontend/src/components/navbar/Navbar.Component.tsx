@@ -1,42 +1,109 @@
+import { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/useAuth";
 import { useNavigate } from "react-router-dom";
+import {
+  NavbarContainer,
+  LogoSection,
+  NavbarLogo,
+  NavbarActions,
+  NavbarActionButton,
+  MobileMenuToggle,
+  MobileMenu,
+  NavMenuDesktop,
+  AuthGroup,
+} from "./Navbar.Style";
 
 export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
-
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate("/");
+    setMobileMenuOpen(false);
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    setMobileMenuOpen(false);
   };
 
   return (
-    <nav style={{ display: "flex", justifyContent: "space-between" }}>
-      <div>
-        <a href="/">ArtStore</a>
-      </div>
+    <NavbarContainer>
+      <LogoSection onClick={() => handleNavigation("/")}>
+        <NavbarLogo>Oops</NavbarLogo>
+      </LogoSection>
 
-      {!isAuthenticated && <div>Login or register to purchase</div>}
-
-      <div>
-        {isAuthenticated ? (
-          <div style={{ display: "flex", gap: "var(--spacing-xs)" }}>
-            <a href="/">Shop</a>
-            <a href="/orders">Orders</a>
-            <a href="/cart">Cart</a>
-            <a href="/profile">Profile</a>
-            {user?.role === "ROLE_OWNER" && <a href="/dashboard">Dashboard</a>}
-            <button onClick={handleLogout}>Logout</button>
-          </div>
-        ) : (
-          <div style={{ display: "flex", gap: "var(--spacing-xs)" }}>
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
-          </div>
+      {/* Desktop Navigation Links */}
+      <NavMenuDesktop>
+        {isAuthenticated && (
+          <>
+            <a onClick={() => handleNavigation("/orders")}>Orders</a>
+            <a onClick={() => handleNavigation("/cart")}>Cart</a>
+            {user?.role === "ROLE_OWNER" && (
+              <a onClick={() => handleNavigation("/dashboard")}>Dashboard</a>
+            )}
+          </>
         )}
-      </div>
-    </nav>
+      </NavMenuDesktop>
+
+      <NavbarActions>
+        {isAuthenticated ? (
+          <AuthGroup>
+            <a
+              onClick={() => handleNavigation("/profile")}
+              className="profile-link"
+            >
+              Profile
+            </a>
+            <NavbarActionButton onClick={handleLogout}>
+              Logout
+            </NavbarActionButton>
+          </AuthGroup>
+        ) : (
+          <AuthGroup>
+            <NavbarActionButton onClick={() => handleNavigation("/login")}>
+              Sign In
+            </NavbarActionButton>
+            <span className="divider">/</span>
+            <NavbarActionButton onClick={() => handleNavigation("/register")}>
+              Register
+            </NavbarActionButton>
+          </AuthGroup>
+        )}
+
+        {isAuthenticated && (
+          <MobileMenuToggle onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <span className="material-symbols-outlined">menu</span>
+          </MobileMenuToggle>
+        )}
+      </NavbarActions>
+
+      {/* Mobile Dropdown */}
+      <MobileMenu isOpen={mobileMenuOpen}>
+        {isAuthenticated && (
+          <>
+            <a onClick={() => handleNavigation("/orders")}>Orders</a>
+            <a onClick={() => handleNavigation("/cart")}>Cart</a>
+            <a onClick={() => handleNavigation("/profile")}>Profile</a>
+            <a onClick={handleLogout}>Logout</a>
+          </>
+        )}
+      </MobileMenu>
+    </NavbarContainer>
   );
 };
 
